@@ -1,0 +1,173 @@
+# Hexo Configuration
+## Docs: https://hexo.io/docs/configuration.html
+## Source: https://github.com/hexojs/hexo/
+
+# Site
+title: 星河梦瑾的博客
+subtitle: 记录技术，也记录生活
+description: 一个用 Hexo + Shoka 搭建的二次元风格静态博客
+keywords: Hexo, Shoka, 博客, 二次元, 前端, 技术笔记
+author: 星河梦瑾
+language: zh-CN
+timezone: 'Asia/Shanghai'
+
+# URL
+## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
+url: http://localhost:4000
+root: /
+permalink: :title/   # edit for Theme.shoka
+permalink_defaults:
+pretty_urls:
+  trailing_index: true
+  trailing_html: true
+
+# Directory
+source_dir: source
+public_dir: public
+tag_dir: tags
+archive_dir: archives
+category_dir: categories
+code_dir: downloads/code
+i18n_dir: :lang
+skip_render:
+
+# Writing
+new_post_name: :title.md # File name of new posts
+default_layout: post
+titlecase: false # Transform title into titlecase
+external_link:
+  enable: true # Open external links in new tab
+  field: site # Apply to the whole site
+  exclude: ''
+filename_case: 0
+render_drafts: false
+post_asset_folder: false
+relative_link: false
+future: true
+# edit for Theme.shoka: 代码高亮交给 hexo-renderer-multi-markdown-it
+highlight:
+  enable: false
+  line_number: true
+  auto_detect: true
+  tab_replace: ''
+prismjs:
+  enable: false
+
+# Home page setting
+index_generator:
+  path: ''
+  per_page: 10
+  order_by: -date
+
+# Category & Tag
+default_category: uncategorized
+category_map:   # edit for Theme.shoka
+  建站笔记: note
+  工具手册: tools
+  随笔: essay
+tag_map:
+
+# Metadata elements
+meta_generator: true
+
+# Date / Time format
+date_format: YYYY-MM-DD
+time_format: HH:mm:ss
+updated_option: 'mtime'
+
+# Pagination
+per_page: 10
+pagination_dir: page
+
+# Include / Exclude file(s)
+include:
+exclude:
+ignore:
+
+# Extensions
+## Plugins: https://hexo.io/plugins/
+## Themes: https://hexo.io/themes/
+theme: shoka # edit for Theme.shoka
+
+# edit for Theme.shoka
+autoprefixer:
+  exclude:
+    - '*.min.css'
+
+markdown:
+  render: # 渲染器配置
+    html: false # 过滤 HTML 标签
+    xhtmlOut: true # 使用 '/' 来闭合单标签
+    breaks: true # 转换段落里的 '\n' 到 <br>
+    linkify: true # 将被类似 URL 的文本自动转换为链接
+    typographer:
+    quotes: ‘’’’
+  plugins: # markdown-it 插件设置
+    - plugin:
+        name: markdown-it-toc-and-anchor
+        enable: true
+        options: # 目录以及锚点应用的 class 名称，shoka 主题必须设置成这样
+          tocClassName: 'toc'
+          anchorClassName: 'anchor'
+    - plugin:
+        name: markdown-it-multimd-table
+        enable: true
+        options:
+          multiline: true
+          rowspan: true
+          headerless: true
+    - plugin:
+        name: ./markdown-it-furigana
+        enable: true
+        options:
+          fallbackParens: "()"
+    - plugin:
+        name: ./markdown-it-spoiler
+        enable: true
+        options:
+          title: "你知道得太多了"
+
+# 订阅（hexo-generator-feed）
+feed:
+  type: atom
+  path: atom.xml
+  limit: 20
+
+# 字数统计（hexo-symbols-count-time）
+symbols_count_time:
+  symbols: true
+  time: true
+  total_symbols: true
+  total_time: true
+  exclude_codeblock: false
+  awl: 4
+  wpm: 275
+  suffix: "mins."
+
+# 搜索（hexo-algoliasearch，需填写自己的 Algolia 配置后启用）
+# algolia:
+#   appId:
+#   apiKey:
+#   adminApiKey:
+#   chunkSize: 5000
+#   indexName:
+#   fields:
+#     - title
+#     - path
+#     - categories
+#     - content:strip:truncate,0,4000
+#     - tags
+
+# Deployment
+## Docs: https://hexo.io/docs/one-command-deployment
+##
+## 方式一：GitHub Actions（推荐，仓库里已带 .github/workflows/deploy.yml）
+##   把仓库推上去，在 Settings → Pages 里把 Source 选成 "GitHub Actions" 即可。
+##   这种方式下 deploy 保持 type 为空。
+##
+## 方式二：本地 hexo d 推到 gh-pages 分支
+##   把 type 改成 git，并填上你的仓库地址，同时把 url / root 改成实际值：
+##   url: https://<用户名>.github.io/<仓库名>
+##   root: /<仓库名>/
+deploy:
+  type: ''

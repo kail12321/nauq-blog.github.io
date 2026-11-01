@@ -1,0 +1,17 @@
+# 随机背景图列表（shoka 会从中随机取一张作为页面背景）
+#
+# 注意事项（这两点都很容易踩坑）：
+# 1. shoka 的 randomBG 只把以 http / // 开头的值原样使用，
+#    其它写法会被拼成「https://tva4.sinaimg.cn/large/<你的值>」，
+#    所以这里必须写完整 URL。
+# 2. 列表条目需超过 6 个，否则会回退到主题自带的图库。
+#
+# 部署到 GitHub Pages 后，把下面的 localhost:4000 换成你的真实域名。
+- http://localhost:4000/images/anime-sky-01.jpg
+- http://localhost:4000/images/anime-sky-02.jpg
+- http://localhost:4000/images/anime-sky-03.jpg
+- http://localhost:4000/images/anime-sky-04.jpg
+- http://localhost:4000/images/anime-sky-01.jpg
+- http://localhost:4000/images/anime-sky-02.jpg
+- http://localhost:4000/images/anime-sky-03.jpg
+- http://localhost:4000/images/anime-sky-04.jpg

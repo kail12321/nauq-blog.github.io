@@ -1,0 +1,53 @@
+/* ============================================================
+   自定义样式 —— 二次元 / 樱花配色微调
+   ============================================================ */
+
+/* 樱花色主色微调 */
+:root {
+  --color-pink: #f28ab2;
+  --color-pink-light: #ffeaf3;
+}
+
+/* 站点标题的描边发光，提升与背景图的对比度 */
+#site-title {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+}
+
+/* 侧栏头像加一圈樱花色描边 */
+#sidebar .avatar {
+  border: 3px solid rgba(242, 138, 178, .55);
+  border-radius: 50%;
+  box-shadow: 0 4px 14px rgba(233, 84, 107, .25);
+}
+
+/* 文章卡片悬停轻微上浮 */
+.post-item:hover {
+  transform: translateY(-3px);
+  transition: transform .25s ease;
+}
+
+/* 文章目录的樱花色标识 */
+.toc .toc-link.active {
+  color: var(--color-pink);
+  border-left-color: var(--color-pink);
+}
+
+/* 行内代码配色 */
+code {
+  color: var(--color-pink);
+  background: rgba(242, 138, 178, .10);
+}
+
+/* 滚动条 */
+::-webkit-scrollbar-thumb {
+  background: rgba(242, 138, 178, .45);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(242, 138, 178, .70);
+}
+
+/* 页脚樱花图标 */
+#footer .footer-icon {
+  color: var(--color-pink);
+}

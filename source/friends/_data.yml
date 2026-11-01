@@ -1,0 +1,34 @@
+- site: Hexo
+  owner: Hexo 团队
+  url: https://hexo.io/zh-cn/
+  desc: 快速、简单且强大的网志框架
+  image: https://hexo.io/favicon.ico
+  color: "#0e83cd"
+
+- site: Shoka
+  owner: 霜月琉璃
+  url: https://shoka.lostyu.me/
+  desc: 优雅的二次元风 Hexo 主题
+  image: https://cdn.jsdelivr.net/gh/amehime/shoka@latest/images/avatar.jpg
+  color: "#e9546b"
+
+- site: GitHub
+  owner: GitHub
+  url: https://github.com/
+  desc: 全球最大的代码托管平台
+  image: https://github.githubassets.com/favicons/favicon.svg
+  color: "#24292e"
+
+- site: MDN
+  owner: Mozilla
+  url: https://developer.mozilla.org/zh-CN/
+  desc: 前端开发者的权威文档
+  image: https://developer.mozilla.org/favicon.ico
+  color: "#1e88e5"
+
+- site: 知乎
+  owner: 知乎
+  url: https://www.zhihu.com/
+  desc: 有问题，就会有答案
+  image: https://static.zhihu.com/heifetz/favicon.ico
+  color: "#0084ff"
