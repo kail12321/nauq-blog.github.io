@@ -58,6 +58,29 @@ blog/
 - **字数统计**：`hexo-symbols-count-time`
 - **订阅**：`hexo-generator-feed` 生成 `/atom.xml`
 - **特效**：点击烟花、加载猫、深色模式按钮
+- **配色**：`source/_data/colors.styl` 与 `custom.styl` 调成樱花粉 + 深空紫的暗色二次元风
+- **桌宠**：右下角 Live2D 看板娘（Shizuku），可点 × 收起，状态记在 localStorage
+
+## 看板娘（桌宠）
+
+由 `scripts/live2d.js` 通过 `after_render:html` 过滤器自动注入，**不修改主题源码**，升级 Shoka 不会丢。
+
+| 项 | 位置 |
+| --- | --- |
+| 注入逻辑 | `scripts/live2d.js` |
+| 库 | `source/js/live2d/L2Dwidget.min.js` + `L2Dwidget.0.min.js`（分块，缺一不可） |
+| 模型 | `source/live2d/shizuku/`（47 个文件，约 2.6 MB，含贴图、动作、音效） |
+
+换模型：把新的模型目录放进 `source/live2d/<名字>/`，改 `scripts/live2d.js` 里的 `MODEL_PATH` 即可。
+
+> **注意**：`L2Dwidget.min.js` 是 webpack 分块构建，会再动态加载 `L2Dwidget.0.min.js`，两个文件必须同时存在，否则库加载后不报错但也不渲染。
+
+另有三个已处理的坑：
+
+1. **容器 id 冲突**：库默认按 `live2d-widget` 查找旧节点并 `removeChild` 后重建。若模板里预先放同名 div，两者互相删除，页面会出现两个同 id 节点而 canvas 不显示。所以容器改名为 `waifu-root`，库的 `name.div` 设为 `waifu-live2d`。
+2. **WebGL 依赖**：拿不到 WebGL 时库只打 `console.error` 然后静默放弃。已加 6 秒兜底，无 canvas 就收起空框。
+3. **小屏与减少动效**：宽度 < 992px 或系统开启「减少动效」时不加载，避免遮挡正文。
+
 
 ## 新增文章
 
