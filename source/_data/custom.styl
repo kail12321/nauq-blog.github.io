@@ -1,53 +1,185 @@
 /* ============================================================
-   自定义样式 —— 二次元 / 樱花配色微调
+   二次元风格自定义样式
+   配色：深空暗紫底 + 樱花粉强调 + 青蓝辅助
+   说明：只覆盖 selectors，不改主题源码，升级 Shoka 不会丢。
    ============================================================ */
 
-/* 樱花色主色微调 */
 :root {
-  --color-pink: #f28ab2;
-  --color-pink-light: #ffeaf3;
+  /* 主色：樱花粉 */
+  --color-pink: #f7a8c4;
+  --color-pink-light: #ffe3ef;
+  --color-red: #ef6f9b;
+  --color-aqua: #7fd7e8;
+  --color-cyan-light: #e0f7fb;
+
+  /* 亮色模式下的柔和底 */
+  --grey-0: #ffffff;
+  --grey-1: #fbf7f9;
+  --grey-2: #f6eef2;
+  --grey-3: #efe4ea;
+
+  /* 主视觉渐变 */
+  --anime-gradient: linear-gradient(135deg, #f7a8c4 0%, #b9a7ee 55%, #7fd7e8 100%);
+  --anime-glow: 0 6px 24px rgba(239, 111, 155, .22);
 }
 
-/* 站点标题的描边发光，提升与背景图的对比度 */
-#site-title {
-  text-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+/* ---------------- 暗色模式：深空 + 樱花 ---------------- */
+html[data-theme="dark"],
+body.dark {
+  --grey-0: #14101c;
+  --grey-1: #1a1526;
+  --grey-2: #221b31;
+  --grey-3: #2b2240;
+  --grey-4: #3a2f52;
+  --grey-5: #8b81a6;
+  --grey-6: #b6abc9;
+  --grey-7: #ddd6ea;
+  --grey-8: #efe9f7;
+  --grey-9: #fdfbff;
+
+  --text-color: #ddd6ea;
+  --header-text-color: #fdfbff;
+  --bg-color: #14101c;
+  --anime-glow: 0 6px 28px rgba(247, 168, 196, .18);
 }
 
-/* 侧栏头像加一圈樱花色描边 */
-#sidebar .avatar {
-  border: 3px solid rgba(242, 138, 178, .55);
+/* 暗色背景加一层星云渐变，避免纯色发闷 */
+html[data-theme="dark"] body,
+body.dark {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 15% 0%, rgba(185, 167, 238, .18), transparent 60%),
+    radial-gradient(ellipse 70% 45% at 90% 10%, rgba(127, 215, 232, .14), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(247, 168, 196, .12), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* ---------------- 站点标题 ---------------- */
+#site-title,
+.site-title,
+h1.title,
+p.artboard {
+  text-shadow: 0 2px 12px rgba(20, 16, 28, .55), 0 0 24px rgba(247, 168, 196, .35);
+}
+
+p.artboard {
+  letter-spacing: .18em;
+  opacity: .92;
+}
+
+/* ---------------- 侧栏头像：樱花描边 + 光晕 ---------------- */
+#sidebar .avatar,
+#sidebar .avatar img,
+.sidebar .face {
   border-radius: 50%;
-  box-shadow: 0 4px 14px rgba(233, 84, 107, .25);
+  border: 3px solid rgba(247, 168, 196, .65);
+  box-shadow: 0 0 0 4px rgba(247, 168, 196, .12), 0 8px 24px rgba(239, 111, 155, .28);
 }
 
-/* 文章卡片悬停轻微上浮 */
-.post-item:hover {
-  transform: translateY(-3px);
-  transition: transform .25s ease;
+/* ---------------- 导航栏 ---------------- */
+#nav .menu .item.title a,
+#nav .menu .item a {
+  transition: color .22s ease, text-shadow .22s ease;
+}
+#nav .menu .item a:hover,
+#nav .menu .item.title a:hover {
+  color: var(--color-pink);
+  text-shadow: 0 0 14px rgba(247, 168, 196, .6);
 }
 
-/* 文章目录的樱花色标识 */
-.toc .toc-link.active {
+/* ---------------- 文章卡片：毛玻璃 + 悬停上浮 ---------------- */
+article.item,
+.post.block,
+.segments .item {
+  transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+}
+
+article.item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--anime-glow);
+}
+
+/* 卡片封面：悬停轻微放大 */
+article.item .cover img {
+  transition: transform .5s ease;
+}
+article.item:hover .cover img {
+  transform: scale(1.04);
+}
+
+/* 卡片标题渐变文字 */
+article.item .info h2 a,
+article.item .info .title a {
+  background: var(--anime-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+/* ---------------- 链接与强调文字 ---------------- */
+a:hover,
+.md a:hover {
+  color: var(--color-pink);
+}
+
+/* 标题前缀装饰（樱花点） */
+.md h2::before,
+.md h3::before {
+  content: "❀";
+  color: var(--color-pink);
+  margin-right: .4em;
+  font-size: .85em;
+  opacity: .85;
+}
+
+/* ---------------- 行内代码与代码块 ---------------- */
+code {
+  color: var(--color-red);
+  background: rgba(247, 168, 196, .12);
+  border-radius: 4px;
+  padding: .1em .35em;
+}
+
+pre code {
+  color: inherit;
+  background: transparent;
+}
+
+/* ---------------- 目录高亮 ---------------- */
+.toc .toc-link.active,
+.toc .toc-link:hover {
   color: var(--color-pink);
   border-left-color: var(--color-pink);
 }
 
-/* 行内代码配色 */
-code {
-  color: var(--color-pink);
-  background: rgba(242, 138, 178, .10);
+/* ---------------- 滚动条 ---------------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
-
-/* 滚动条 */
 ::-webkit-scrollbar-thumb {
-  background: rgba(242, 138, 178, .45);
+  background: linear-gradient(180deg, rgba(247, 168, 196, .65), rgba(185, 167, 238, .65));
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(242, 138, 178, .70);
+  background: linear-gradient(180deg, rgba(247, 168, 196, .9), rgba(185, 167, 238, .9));
 }
 
-/* 页脚樱花图标 */
-#footer .footer-icon {
+/* ---------------- 页脚 ---------------- */
+#footer .footer-icon,
+#footer i {
   color: var(--color-pink);
+}
+
+/* ---------------- 圆角与选中 ---------------- */
+::selection {
+  background: rgba(247, 168, 196, .35);
+  color: inherit;
+}
+
+/* ---------------- 小屏适配 ---------------- */
+@media (max-width: 991px) {
+  article.item:hover {
+    transform: none;
+  }
 }
