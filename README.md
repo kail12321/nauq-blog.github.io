@@ -99,9 +99,24 @@ python _tools/make_anime_assets.py
 | --- | --- |
 | 注入逻辑 | `scripts/live2d.js` |
 | 库 | `source/js/live2d/L2Dwidget.min.js` + `L2Dwidget.0.min.js`（分块，缺一不可） |
-| 模型 | `source/live2d/izumi/`（38 个文件，约 3.3 MB，泉此方 / Lucky Star） |
+| 模型 | `source/live2d/kasumi/`（90 个文件，约 3.5 MB，市谷有咲 / BanG Dream!） |
 
 换模型：把新的模型目录放进 `source/live2d/<名字>/`，改 `scripts/live2d.js` 里的 `MODEL_PATH` 即可。
+
+### 当前模型：市谷有咲（kasumi）
+
+来自 npm 包 `live2d-widget-model-kasumi@1.0.1`，是目前动作最丰富的一个：
+
+| 内容 | 数量 |
+| --- | --- |
+| 动作 `.mtn` | 53 |
+| 表情 `.exp.json` | 32 |
+| 贴图 | 2 张 1024×1024 |
+| 物理演算 | `kasumi_event128.physics.json` |
+
+模型清单 `kasumi_event128.model.json` 里的 `motions.idle` 分组把 53 个动作**全部挂在 idle 下**，所以点击任意部位都会随机播放其中一个（含 `nf*` 摸头、`nnf*` 反向、`smile*`、`sleep*`、`angry01`、`wink01` 等）。
+
+> 注意：这个模型没有 `hit_areas` 分区定义，因此无法做到「点头触发 A、摸手触发 B」。想要分区触发的精细交互需要换支持 `hit_areas` 的模型。
 
 > **注意**：`L2Dwidget.min.js` 是 webpack 分块构建，会再动态加载 `L2Dwidget.0.min.js`，两个文件必须同时存在，否则库加载后不报错但也不渲染。
 

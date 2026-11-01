@@ -15,8 +15,9 @@
  */
 
 const JS_PATH = 'js/live2d/L2Dwidget.min.js';
-// 泉此方（Lucky Star）—— live2d-widget-model-izumi
-const MODEL_PATH = 'live2d/izumi/izumi.model.json';
+// 市谷有咲（BanG Dream!）—— live2d-widget-model-kasumi
+// 53 个动作 + 32 个表情 + physics，互动最丰富
+const MODEL_PATH = 'live2d/kasumi/kasumi_event128.model.json';
 
 const TEMPLATE = `
 <div id="waifu-root" aria-hidden="true">
