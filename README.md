@@ -59,7 +59,37 @@ blog/
 - **订阅**：`hexo-generator-feed` 生成 `/atom.xml`
 - **特效**：点击烟花、加载猫、深色模式按钮
 - **配色**：`source/_data/colors.styl` 与 `custom.styl` 调成樱花粉 + 深空紫的暗色二次元风
-- **桌宠**：右下角 Live2D 看板娘（Shizuku），可点 × 收起，状态记在 localStorage
+- **背景**：8 张本地绘制的二次元场景（夕阳电线杆 / 深夜城市 / 樱花鸟居 / 夏日海边等），刷新随机
+- **鼠标**：箭头、爱心、文本、手型四套二次元像素图标
+- **桌宠**：右下角 Live2D 看板娘（泉此方），可点 × 收起，状态记在 localStorage
+
+## 素材生成
+
+背景与鼠标图标都由 `_tools/make_anime_assets.py` 用 numpy + PIL **本地绘制**，不下载任何外部图片，因此没有 CDN 失效或版权问题。想换风格直接改脚本里的配色与函数再跑一次：
+
+```bash
+python _tools/make_anime_assets.py
+```
+
+产物：
+
+| 目录 | 内容 |
+| --- | --- |
+| `source/_data/images/` | 8 张 1920×1080 背景（`anime-*.jpg`） |
+| `source/images/cursor/` | 4 个 32×32 鼠标图标（`arrow` / `pointer` / `text` / `hand`） |
+
+> `images.yml` 里的地址必须写**完整 URL**，且条目要**多于 6 条**，否则 Shoka 会回退到内置的新浪图床图库。
+
+## 鼠标图标
+
+在 `source/_data/custom.styl` 里用相对路径 `../images/cursor/...`（`app.css` 在 `<root>/css/` 下，因此根目录和子目录部署都正确），并带热点坐标：
+
+| 场景 | 图标 | 热点 |
+| --- | --- | --- |
+| 页面默认 | 箭头 + 樱花描边 | `2 2` |
+| 链接 / 按钮 | 粉色爱心 | `16 8` |
+| 代码 / 输入框 | 粉色 I 形 | `16 16` |
+| 链接悬停强调 | 小手 | `16 4` |
 
 ## 看板娘（桌宠）
 
@@ -69,7 +99,7 @@ blog/
 | --- | --- |
 | 注入逻辑 | `scripts/live2d.js` |
 | 库 | `source/js/live2d/L2Dwidget.min.js` + `L2Dwidget.0.min.js`（分块，缺一不可） |
-| 模型 | `source/live2d/shizuku/`（47 个文件，约 2.6 MB，含贴图、动作、音效） |
+| 模型 | `source/live2d/izumi/`（38 个文件，约 3.3 MB，泉此方 / Lucky Star） |
 
 换模型：把新的模型目录放进 `source/live2d/<名字>/`，改 `scripts/live2d.js` 里的 `MODEL_PATH` 即可。
 

@@ -15,7 +15,8 @@
  */
 
 const JS_PATH = 'js/live2d/L2Dwidget.min.js';
-const MODEL_PATH = 'live2d/shizuku/shizuku.model.json';
+// 泉此方（Lucky Star）—— live2d-widget-model-izumi
+const MODEL_PATH = 'live2d/izumi/izumi.model.json';
 
 const TEMPLATE = `
 <div id="waifu-root" aria-hidden="true">
@@ -46,10 +47,10 @@ const TEMPLATE = `
       name: { div: 'waifu-live2d', canvas: 'waifu-canvas' },
       display: {
         position: 'right',
-        width: 180,
-        height: 320,
-        hOffset: 0,
-        vOffset: -12
+        width: 220,
+        height: 380,
+        hOffset: 14,
+        vOffset: -34
       },
       mobile: { show: false, scale: 0.5 },
       react: { opacityDefault: 0.92, opacityOnHover: 1 },
@@ -113,8 +114,8 @@ const TEMPLATE = `
   position: fixed;
   right: 0;
   bottom: 0;
-  width: 180px;
-  height: 320px;
+  width: 220px;
+  height: 380px;
   z-index: 880;
   pointer-events: none;
 }

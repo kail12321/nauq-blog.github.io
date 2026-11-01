@@ -23,6 +23,48 @@
   --anime-glow: 0 6px 24px rgba(239, 111, 155, .22);
 }
 
+/* ============================================================
+   鼠标图标（二次元像素风）
+   用相对路径 ../images/... ：app.css 位于 <root>/css/，
+   因此无论部署在根目录还是子目录都能正确解析。
+   第二个数值是热点位置(px)，保证点击点落在图形尖端。
+   ============================================================ */
+html,
+body {
+  cursor: url('../images/cursor/arrow.png') 2 2, auto;
+}
+
+a,
+button,
+.button,
+.btn,
+label,
+select,
+summary,
+[role="button"],
+.pointer,
+#waifu-toggle {
+  cursor: url('../images/cursor/pointer.png') 16 8, pointer;
+}
+
+input,
+textarea,
+code,
+pre,
+kbd,
+samp,
+.md code,
+.md pre {
+  cursor: url('../images/cursor/text.png') 16 16, text;
+}
+
+/* 强调元素上用手型图标，和爱心的语义区分开 */
+.markdown-body a:hover,
+.md a:hover,
+#footer a:hover {
+  cursor: url('../images/cursor/hand.png') 16 4, pointer;
+}
+
 /* ---------------- 暗色模式：深空 + 樱花 ---------------- */
 html[data-theme="dark"],
 body.dark {
