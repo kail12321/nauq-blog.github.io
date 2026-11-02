@@ -8,12 +8,12 @@
 #
 # 这 8 张都是用 _tools/make_anime_assets.py 本地绘制的二次元场景：
 #   夕阳电线杆 / 深夜城市 / 樱花鸟居 / 夏日海边 / 晴空 / 黄昏 / 星空 / 樱色
-# 部署到 GitHub Pages 后，把下面的 localhost:4000 换成你的真实域名。
-- http://localhost:4000/images/anime-sunset.jpg
-- http://localhost:4000/images/anime-night.jpg
-- http://localhost:4000/images/anime-sakura.jpg
-- http://localhost:4000/images/anime-sea.jpg
-- http://localhost:4000/images/anime-sky-01.jpg
-- http://localhost:4000/images/anime-sky-02.jpg
-- http://localhost:4000/images/anime-sky-03.jpg
-- http://localhost:4000/images/anime-sky-04.jpg
+# 换域名时只改这一个前缀即可。
+- https://nauq-blog.github.io/images/anime-sunset.jpg
+- https://nauq-blog.github.io/images/anime-night.jpg
+- https://nauq-blog.github.io/images/anime-sakura.jpg
+- https://nauq-blog.github.io/images/anime-sea.jpg
+- https://nauq-blog.github.io/images/anime-sky-01.jpg
+- https://nauq-blog.github.io/images/anime-sky-02.jpg
+- https://nauq-blog.github.io/images/anime-sky-03.jpg
+- https://nauq-blog.github.io/images/anime-sky-04.jpg
