@@ -25,11 +25,17 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # hexo 8 要求 node >= 20.19.0，不能只写 20
+          node-version: '20.19'
           cache: npm
 
       - name: Install dependencies
         run: npm ci
+        env:
+          # hexo-algoliasearch 间接依赖 puppeteer，装包时会去下载 Chromium，
+          # 构建用不到，跳过以免拖慢或失败
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
 
       - name: Build
         run: npx hexo generate
