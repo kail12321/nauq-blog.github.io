@@ -128,9 +128,14 @@ markdown:
           title: "你知道得太多了"
 
 # 订阅（hexo-generator-feed）
+# Shoka 主题的 <head> 同时声明了 rss.xml，只生成 atom.xml 会让该链接 404
 feed:
-  type: atom
-  path: atom.xml
+  type:
+    - atom
+    - rss2
+  path:
+    - atom.xml
+    - rss.xml
   limit: 20
 
 # 字数统计（hexo-symbols-count-time）
