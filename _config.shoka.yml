@@ -90,6 +90,9 @@ menu:
     archives: /archives/ || list-alt
     categories: /categories/ || th
     tags: /tags/ || tags
+  works: /works/ || star
+  music: /music/ || music
+  messages: /messages/ || envelope
   friends: /friends/ || heart
 
 # Social Links

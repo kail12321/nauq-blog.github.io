@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>简词 · 每天一点点</title>
+<meta name="description" content="简洁的背单词工具：考研 / 雅思 / 六级词书，按记忆曲线复习，例句 + 词根词缀 + 形近词 + 变形 + 单词填空巩固。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f6ef7'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E7%AE%80%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="#" data-act="nav" data-view="today">
+      <span class="logo">简</span>
+      <span class="brand-txt"><b>简词</b><i>每天一点点</i></span>
+    </a>
+    <nav class="tabs" id="tabs">
+      <button class="tab" data-act="nav" data-view="today">今日</button>
+      <button class="tab" data-act="nav" data-view="books">词书</button>
+      <button class="tab" data-act="nav" data-view="roots">词根</button>
+      <button class="tab" data-act="nav" data-view="stats">统计</button>
+      <button class="tab" data-act="nav" data-view="settings">设置</button>
+    </nav>
+    <button class="icon-btn" id="themeBtn" data-act="theme" title="切换深浅色">◐</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="view-today" class="view"></section>
+  <section id="view-books" class="view"></section>
+  <section id="view-roots" class="view"></section>
+  <section id="view-stats" class="view"></section>
+  <section id="view-settings" class="view"></section>
+</main>
+
+<footer class="foot">
+  <span>简词 JianCi · 纯本地运行，数据只保存在你的浏览器里</span>
+</footer>
+
+<!-- 学习 / 复习 / 填空 浮层 -->
+<div class="overlay" id="overlay" hidden>
+  <div class="overlay-in">
+    <div class="ov-head">
+      <button class="icon-btn" id="ovClose" data-act="exit-session" title="退出（进度已保存）">✕</button>
+      <div class="ov-head-mid">
+        <div class="ov-title" id="ovTitle">新词学习</div>
+        <div class="ov-count" id="ovCount"></div>
+      </div>
+      <button class="icon-btn" id="ovSpeak" data-act="speak-current" title="朗读当前单词">🔊</button>
+    </div>
+    <div class="bar ov-bar"><i id="ovBar"></i></div>
+    <div class="ov-body" id="ovBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="js/data/kaoyan.js"></script>
+<script src="js/data/cet6.js"></script>
+<script src="js/data/ielts.js"></script>
+<script src="js/data/morph-prefix.js"></script>
+<script src="js/data/morph-suffix.js"></script>
+<script src="js/data/morph-root-a.js"></script>
+<script src="js/data/morph-root-m.js"></script>
+<script src="js/srs.js"></script>
+<script src="js/morph.js"></script>
+<script src="js/store.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

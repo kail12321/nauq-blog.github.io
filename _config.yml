@@ -30,6 +30,8 @@ category_dir: categories
 code_dir: downloads/code
 i18n_dir: :lang
 skip_render:
+  - jianci/**
+  - music/index.html
 
 # Writing
 new_post_name: :title.md # File name of new posts
@@ -96,7 +98,7 @@ autoprefixer:
 
 markdown:
   render: # 渲染器配置
-    html: false # 过滤 HTML 标签
+    html: true # 允许 Markdown 中书写原始 HTML（作品页/留言页需要）
     xhtmlOut: true # 使用 '/' 来闭合单标签
     breaks: true # 转换段落里的 '\n' 到 <br>
     linkify: true # 将被类似 URL 的文本自动转换为链接
