@@ -34,6 +34,9 @@ Shoka 是霜月琉璃开发的 Hexo 主题，卡片式布局、随机背景图�
 
 如果对文章里的内容有疑问，或者想聊点别的，欢迎通过左上角的社交图标找到我。
 
+- 📮 邮箱：[1736128525@qq.com](mailto:1736128525@qq.com)
+- 💬 留言板：[星河信箱](/nauq-blog.github.io/messages/)（无需登录、完全匿名）
+
 ```text
 Keep it simple, keep writing.
 ```
