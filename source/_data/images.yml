@@ -1,20 +1,19 @@
 # 随机背景图列表（shoka 会从中随机取一张作为页面背景）
 #
-# 注意事项（这两点都很容易踩坑）：
+# 注意事项（这三点都很容易踩坑）：
 # 1. shoka 的 randomBG 只把以 http / // 开头的值原样使用，
 #    其它写法会被拼成「https://tva4.sinaimg.cn/large/<你的值>」，
 #    所以这里必须写完整 URL。
 # 2. 列表条目需超过 6 个，否则会回退到主题自带的图库。
+# 3. 这里用完整绝对地址；换域名时只改前缀即可。
 #
 # 这 8 张都是用 _tools/make_anime_assets.py 本地绘制的二次元场景：
 #   夕阳电线杆 / 深夜城市 / 樱花鸟居 / 夏日海边 / 晴空 / 黄昏 / 星空 / 樱色
-# 换域名时只改这一个前缀即可。
-- https://nauq-blog.github.io/images/anime-sunset.jpg
-- https://nauq-blog.github.io/images/anime-sunset.jpg
-- https://nauq-blog.github.io/images/anime-night.jpg
-- https://nauq-blog.github.io/images/anime-sakura.jpg
-- https://nauq-blog.github.io/images/anime-sea.jpg
-- https://nauq-blog.github.io/images/anime-sky-01.jpg
-- https://nauq-blog.github.io/images/anime-sky-02.jpg
-- https://nauq-blog.github.io/images/anime-sky-03.jpg
-- https://nauq-blog.github.io/images/anime-sky-04.jpg
+- https://kail12321.github.io/nauq-blog.github.io/images/anime-sunset.jpg
+- https://kail12321.github.io/nauq-blog.github.io/images/anime-night.jpg
+- https://kail12321.github.io/nauq-blog.github.io/images/anime-sakura.jpg
+- https://kail12321.github.io/nauq-blog.github.io/images/anime-sea.jpg
+- https://kail12321.github.io/nauq-blog.github.io/images/anime-sky-01.jpg
+- https://kail12321.github.io/nauq-blog.github.io/images/anime-sky-02.jpg
+- https://kail12321.github.io/nauq-blog.github.io/images/anime-sky-03.jpg
+- https://kail12321.github.io/nauq-blog.github.io/images/anime-sky-04.jpg
