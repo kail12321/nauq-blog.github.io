@@ -59,6 +59,13 @@
       tag: "IELTS",
       desc: "雅思学术场景词与写作论证词，英式拼写优先",
       accent: "#d97706"
+    },
+    {
+      id: "toefl",
+      name: "托福核心词汇",
+      tag: "TOEFL",
+      desc: "托福高频学术词，覆盖听说读写四大场景",
+      accent: "#8b5cf6"
     }
   ];
 
@@ -168,7 +175,8 @@
         desc: m.desc,
         accent: m.accent,
         builtin: true,
-        words: data[m.id] || []
+        /* 主词库（精讲）+ 全量词库（-full 后缀，如考研/六级大纲词表）合并 */
+        words: (data[m.id] || []).concat(data[m.id + "-full"] || [])
       };
     });
     (S.custom || []).forEach(function (b) {

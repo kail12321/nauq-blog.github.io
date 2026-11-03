@@ -273,7 +273,7 @@
 
     if (!books.length) {
       box.innerHTML =
-        '<div class="card empty">还没有选择词书。<br>先去「词书」里挑一本（考研 / 雅思 / 六级），再回来开始今天的背诵。<div class="mt16"><button class="btn primary" data-act="nav" data-view="books">去选词书</button></div></div>';
+        '<div class="card empty">还没有选择词书。<br>先去「词书」里挑一本（考研 / 六级 / 雅思 / 托福），再回来开始今天的背诵。<div class="mt16"><button class="btn primary" data-act="nav" data-view="books">去选词书</button></div></div>';
       return;
     }
 

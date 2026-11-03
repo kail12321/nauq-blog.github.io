@@ -35,6 +35,38 @@
   <section id="view-settings" class="view"></section>
 </main>
 
+<section class="wrap community" id="community">
+  <div class="card" style="padding:16px 18px">
+    <div class="row between">
+      <div>
+        <b>📮 投稿 / 建议</b>
+        <div class="muted" style="margin-top:3px">想补充词书、反馈错误、提新功能？直接发邮件给我</div>
+      </div>
+      <a class="btn primary sm" href="mailto:1736128525@qq.com?subject=%E7%AE%80%E8%AF%8D%E6%8A%95%E7%A8%BF">1736128525@qq.com</a>
+    </div>
+  </div>
+
+  <div class="card" style="padding:16px 18px;margin-top:12px">
+    <b>💬 留言评论</b>
+    <div class="muted" style="margin-top:3px">无需登录，完全匿名；也可在下方评论交流</div>
+    <div class="row" style="margin-top:10px">
+      <input id="cmtNick" class="cmt-input" maxlength="20" placeholder="昵称（留空显示「匿名同学」）" />
+    </div>
+    <textarea id="cmtText" class="cmt-text" maxlength="300" placeholder="说说你的使用感受，或想要什么新功能…（300 字以内）"></textarea>
+    <div class="row between" style="margin-top:8px">
+      <span class="muted"><span id="cmtCnt">0</span>/300</span>
+      <button class="btn primary sm" id="cmtPost">发表评论</button>
+    </div>
+    <div class="cmt-tip muted" id="cmtTip"></div>
+  </div>
+
+  <div class="row between" style="margin:16px 2px 10px">
+    <b id="cmtTotal">大家的评论</b>
+    <button class="btn ghost sm" id="cmtRefresh">刷新</button>
+  </div>
+  <div id="cmtList"><div class="cmt-empty">正在加载评论…</div></div>
+</section>
+
 <footer class="foot">
   <span>简词 JianCi · 纯本地运行，数据只保存在你的浏览器里</span>
 </footer>
@@ -58,8 +90,11 @@
 <div class="toast" id="toast" hidden></div>
 
 <script src="js/data/kaoyan.js"></script>
+<script src="js/data/kaoyan-full.js"></script>
 <script src="js/data/cet6.js"></script>
+<script src="js/data/cet6-full.js"></script>
 <script src="js/data/ielts.js"></script>
+<script src="js/data/toefl.js"></script>
 <script src="js/data/morph-prefix.js"></script>
 <script src="js/data/morph-suffix.js"></script>
 <script src="js/data/morph-root-a.js"></script>
@@ -68,5 +103,7 @@
 <script src="js/morph.js"></script>
 <script src="js/store.js"></script>
 <script src="js/app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js"></script>
+<script src="js/comments.js"></script>
 </body>
 </html>
