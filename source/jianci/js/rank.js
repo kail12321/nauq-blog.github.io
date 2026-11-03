@@ -99,49 +99,46 @@
     return { word: w, options: opts, answerIndex: answerIndex };
   }
 
-  /* ---------------- 云端（排行榜） ---------------- */
-  var ENDPOINT = "https://xinghe-guestbook.app.workbuddy.host";
-  var PK = "wbpk_4ZIhceXcDU8edbXAC18P3N_lsxfdQFQ1ejJAMhUXfGuNctaJt1CS2gO";
-  var TABLE = "leaderboard";
-  var cloud = null;
-  try {
-    if (typeof WorkBuddyCloud !== "undefined") {
-      cloud = WorkBuddyCloud.createWorkBuddyCloud({ endpoint: ENDPOINT, publishableKey: PK });
-    }
-  } catch (e) { cloud = null; }
+  /* ---------------- 云端（排行榜，经同源 iframe 桥） ----------------
+   * 云服务网关强制精确 Origin 匹配，GitHub Pages 域名直连会被 403。
+   * 因此排行榜页部署在应用同域下，由本页 iframe 嵌入；
+   * 上报通过 postMessage 交给 iframe（同源）完成写入。 */
+  var BOARD_URL = "https://xinghe-guestbook.app.workbuddy.host/jianci-board.html?sharecode=LP45SNTRLR";
 
-  /** 上报当前段位、等级与学习进度（安静失败） */
-  function report(extra) {
-    if (!cloud) return Promise.resolve(false);
-    var d = state;
-    var exp = Math.max(0, Math.min(999999, (extra && extra.exp) | 0));
-    var row = {
-      player_id: d.pid,
-      nickname: (d.nick || "匿名同学").slice(0, 20),
-      tier: Math.max(0, Math.min(4, d.tier | 0)),
-      stars: Math.max(0, Math.min(3, d.stars | 0)),
-      learned: Math.max(0, (extra && extra.learned) | 0),
-      mastered: Math.max(0, (extra && extra.mastered) | 0),
-      best_streak: Math.max(0, Math.min(9999, d.best | 0)),
-      exp: exp,
-      level: Math.max(1, Math.min(9999, (extra && extra.level) | 0 || Math.floor(exp / 15) + 1)),
-      updated_at: new Date().toISOString()
-    };
-    return cloud.database.from(TABLE).upsert(row, { onConflict: "player_id" }).then(function (res) {
-      return !res.error;
-    }).catch(function () { return false; });
+  function boardWindow() {
+    var f = null;
+    try { f = document.getElementById("rankBoardFrame"); } catch (e) { return null; }
+    if (!f || !f.contentWindow) return null;
+    return f.contentWindow;
   }
 
-  /** 拉取排行榜（stars 高在前，其次已学词数） */
-  function fetchBoard(limit) {
-    if (!cloud) return Promise.resolve({ error: { message: "排行榜服务暂时不可用" }, data: null });
-    return cloud.database.from(TABLE)
-      .select("player_id, nickname, tier, stars, learned, mastered, best_streak, exp, level, updated_at")
-      .order("stars", { ascending: false })
-      .order("learned", { ascending: false })
-      .limit(limit || 50)
-      .then(function (res) { return res; })
-      .catch(function (e) { return { error: { message: (e && e.message) || "加载失败" }, data: null }; });
+  /** 把身份/最新数据交给排行榜 iframe（同源代理）上报 */
+  function report(extra) {
+    var w = boardWindow();
+    if (!w) return false;
+    var d = state;
+    var exp = Math.max(0, Math.min(999999, (extra && extra.exp) | 0));
+    w.postMessage({
+      type: "jc-rank-report",
+      payload: {
+        player_id: d.pid,
+        nickname: (d.nick || "匿名同学").slice(0, 20),
+        tier: Math.max(0, Math.min(4, d.tier | 0)),
+        stars: Math.max(0, Math.min(3, d.stars | 0)),
+        learned: Math.max(0, (extra && extra.learned) | 0),
+        mastered: Math.max(0, (extra && extra.mastered) | 0),
+        best_streak: Math.max(0, Math.min(9999, d.best | 0)),
+        exp: exp,
+        level: Math.max(1, Math.min(9999, (extra && extra.level) | 0 || Math.floor(exp / 15) + 1))
+      }
+    }, "*");
+    return true;
+  }
+
+  /** 告诉排行榜 iframe 当前玩家 id（用于高亮自己） */
+  function syncIdentity() {
+    var w = boardWindow();
+    if (w && state.pid) w.postMessage({ type: "jc-rank-identity", pid: state.pid }, "*");
   }
 
   function setNick(nick) {
@@ -161,8 +158,8 @@
     promote: promote,
     buildQuestion: buildQuestion,
     report: report,
-    fetchBoard: fetchBoard,
-    setNick: setNick,
-    hasCloud: function () { return !!cloud; }
+    syncIdentity: syncIdentity,
+    boardWindow: boardWindow,
+    setNick: setNick
   };
 })();

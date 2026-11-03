@@ -875,13 +875,8 @@
       '<input id="rankNick" class="cmt-input" maxlength="20" placeholder="留空显示「匿名同学」" value="' + esc(rs.nick) + '">' +
       '<button class="btn ghost sm" data-act="rank-nick-save">保存</button></div></div>';
 
-    // 排行榜
-    html += '<div class="row between" style="margin:16px 2px 10px"><b>🏆 全站排行榜</b>' +
-      '<button class="btn ghost sm" data-act="rank-refresh">刷新</button></div>' +
-      '<div id="rankBoard"><div class="cmt-empty">正在加载排行榜…</div></div>';
-
     $("#view-rank").innerHTML = html;
-    loadBoard();
+    bindBoard();
   }
 
   function dots3(stars) {
@@ -890,41 +885,17 @@
     return s;
   }
 
-  function loadBoard() {
-    var el = $("#rankBoard");
-    if (!el) return;
-    if (!RANK.hasCloud()) {
-      el.innerHTML = '<div class="cmt-empty">排行榜服务暂时不可用，稍后再试试～</div>';
-      return;
-    }
-    RANK.fetchBoard(50).then(function (res) {
-      if (!$("#rankBoard")) return;
-      if (res.error || !res.data) {
-        el.innerHTML = '<div class="cmt-empty">排行榜加载失败：' + esc((res.error && res.error.message) || "未知错误") + "</div>";
-        return;
-      }
-      var rows = res.data || [];
-      if (!rows.length) {
-        el.innerHTML = '<div class="cmt-empty">还没有人上榜，打一局排位赛抢占第一 ✨</div>';
-        return;
-      }
-      var me = RANK.state().pid;
-      var medals = ["🥇", "🥈", "🥉"];
-      el.innerHTML = rows.map(function (r, i) {
-        var tp = RANK.tierInfo(r.tier);
-        var lv = nz(r.level);
-        return '<div class="cmt rank-row' + (r.player_id === me ? " me" : "") + '">' +
-          '<div class="cmt-head">' +
-          '<span class="rank-no">' + (medals[i] || i + 1) + "</span>" +
-          '<div class="cmt-ava" style="background:' + tp.color + '">' + tp.icon + "</div>" +
-          '<span class="cmt-name">' + esc(r.nickname || "匿名同学") + "</span>" +
-          (lv ? '<span class="pill gray">Lv.' + lv + "</span>" : "") +
-          '<span class="tier-badge sm" style="--tc:' + tp.color + '"><span class="tier-ico">' + tp.icon + "</span>" + esc(tp.name) +
-          '<span class="tier-stars">' + dots3(r.stars) + "</span></span>" +
-          '<span class="rank-meta">学 ' + nz(r.learned) + " 词</span>" +
-          "</div></div>";
-      }).join("");
-    });
+  /** 排行榜 iframe 就绪后：同步身份 + 上报最新数据 */
+  function bindBoard() {
+    var f = document.getElementById("rankBoardFrame");
+    if (!f) return;
+    var post = function () {
+      RANK.syncIdentity();
+      reportRank();
+    };
+    if (f.dataset.bound) { post(); return; }
+    f.dataset.bound = "1";
+    f.addEventListener("load", post);
   }
 
   function startRank() {
@@ -1665,9 +1636,6 @@
         break;
       case "rank-next":
         rankNext();
-        break;
-      case "rank-refresh":
-        loadBoard();
         break;
       case "rank-nick-save": {
         var nn = RANK.setNick(($("#rankNick") || {}).value);

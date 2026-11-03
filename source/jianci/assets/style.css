@@ -632,3 +632,8 @@ kbd {
 }
 .exp-bar { flex: 1; max-width: 180px; height: 7px; border-radius: 999px; background: var(--bg-soft); overflow: hidden; }
 .exp-bar i { display: block; height: 100%; background: linear-gradient(90deg, #4f6ef7, #8b5cf6); border-radius: 999px; }
+
+/* ── 云端内嵌窗口 ── */
+.cloud-frame { display: block; width: 100%; border: 1px solid var(--line); border-radius: 12px; background: #f5f6fa; }
+iframe.cloud-frame { margin-top: 10px; height: 560px; }
+iframe.board-frame { margin-top: 2px; height: 460px; }

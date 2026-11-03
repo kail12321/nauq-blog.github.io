@@ -50,23 +50,14 @@
 
   <div class="card" style="padding:16px 18px;margin-top:12px">
     <b>💬 留言评论</b>
-    <div class="muted" style="margin-top:3px">无需登录，完全匿名；也可在下方评论交流</div>
-    <div class="row" style="margin-top:10px">
-      <input id="cmtNick" class="cmt-input" maxlength="20" placeholder="昵称（留空显示「匿名同学」）" />
-    </div>
-    <textarea id="cmtText" class="cmt-text" maxlength="300" placeholder="说说你的使用感受，或想要什么新功能…（300 字以内）"></textarea>
-    <div class="row between" style="margin-top:8px">
-      <span class="muted"><span id="cmtCnt">0</span>/300</span>
-      <button class="btn primary sm" id="cmtPost">发表评论</button>
-    </div>
-    <div class="cmt-tip muted" id="cmtTip"></div>
+    <div class="muted" style="margin-top:3px">无需登录，完全匿名</div>
+    <iframe class="cloud-frame" src="https://xinghe-guestbook.app.workbuddy.host/jianci-comments.html?sharecode=LP45SNTRLR" loading="lazy" title="简词评论区"></iframe>
   </div>
 
   <div class="row between" style="margin:16px 2px 10px">
-    <b id="cmtTotal">大家的评论</b>
-    <button class="btn ghost sm" id="cmtRefresh">刷新</button>
+    <b>🏆 全站排行榜</b>
   </div>
-  <div id="cmtList"><div class="cmt-empty">正在加载评论…</div></div>
+  <iframe id="rankBoardFrame" class="cloud-frame board-frame" src="https://xinghe-guestbook.app.workbuddy.host/jianci-board.html?sharecode=LP45SNTRLR" loading="lazy" title="简词全站排行榜"></iframe>
 </section>
 
 <footer class="foot">
@@ -106,7 +97,5 @@
 <script src="js/store.js"></script>
 <script src="js/rank.js"></script>
 <script src="js/app.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js"></script>
-<script src="js/comments.js"></script>
 </body>
 </html>
