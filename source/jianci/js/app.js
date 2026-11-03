@@ -280,6 +280,7 @@
 
     var p = ST.plan(TODAY);
     var stats = ST.stats(TODAY);
+    var ei = ST.expInfo();
     var doneUnits = nz(p.newTarget) - nz(p.newPending) + nz(p.reviewedToday) + Math.min(nz(p.quizDone), nz(p.quizTarget));
     var totalUnits = nz(p.newTarget) + nz(p.reviewTarget) + nz(p.quizTarget);
     var overall = totalUnits ? pct(doneUnits, totalUnits) : 100;
@@ -302,6 +303,9 @@
       '<div class="hero-title">' + esc(heroTitle) + "</div>" +
       '<div class="hero-sub">' + esc(heroSub) + "</div>" +
       '<div class="hero-chip">' + esc(bookNames) + " · 每日 " + nz(s.dailyNew) + " 词</div>" +
+      '<div class="exp-line"><span class="exp-lv">Lv.' + ei.level + "</span>" +
+      '<span class="bar exp-bar"><i style="width:' + ei.pct + '%"></i></span>' +
+      '<span class="muted">' + ei.into + "/" + ei.need + " EXP</span></div>" +
       "</div>" +
       '<div class="ring" style="--p:' + overall + '%"><span>' + overall + "%</span></div>" +
       "</div>";
@@ -822,6 +826,7 @@
     var rs = RANK.state();
     var p = ST.plan(TODAY);
     var stats = ST.stats(TODAY);
+    var ei = ST.expInfo();
     var pool = ST.day(TODAY).reviewIds.map(ST.wordById).filter(Boolean);
     var t = RANK.tierInfo(rs.tier);
     var totalStars = RANK.totalStars(rs);
@@ -836,6 +841,9 @@
       ' <span class="tier-stars big">' + dots3(rs.stars) + "</span></div>" +
       '<div class="muted">总星数 ' + totalStars + " · 最佳连击 " + nz(rs.best) +
       " · 已学 " + nz(stats.totalWords) + " 词</div>" +
+      '<div class="exp-line"><span class="exp-lv">Lv.' + ei.level + "</span>" +
+      '<span class="bar exp-bar"><i style="width:' + ei.pct + '%"></i></span>' +
+      '<span class="muted">' + ei.exp + " EXP</span></div>" +
       "</div></div>" +
       '<div class="rank-goal">' + (maxed
         ? "已达最高段位，传说中的奶娃 👶"
@@ -904,11 +912,13 @@
       var medals = ["🥇", "🥈", "🥉"];
       el.innerHTML = rows.map(function (r, i) {
         var tp = RANK.tierInfo(r.tier);
+        var lv = nz(r.level);
         return '<div class="cmt rank-row' + (r.player_id === me ? " me" : "") + '">' +
           '<div class="cmt-head">' +
           '<span class="rank-no">' + (medals[i] || i + 1) + "</span>" +
           '<div class="cmt-ava" style="background:' + tp.color + '">' + tp.icon + "</div>" +
           '<span class="cmt-name">' + esc(r.nickname || "匿名同学") + "</span>" +
+          (lv ? '<span class="pill gray">Lv.' + lv + "</span>" : "") +
           '<span class="tier-badge sm" style="--tc:' + tp.color + '"><span class="tier-ico">' + tp.icon + "</span>" + esc(tp.name) +
           '<span class="tier-stars">' + dots3(r.stars) + "</span></span>" +
           '<span class="rank-meta">学 ' + nz(r.learned) + " 词</span>" +
@@ -1021,7 +1031,13 @@
 
   function reportRank() {
     var stats = ST.stats(TODAY);
-    RANK.report({ learned: nz(stats.totalWords), mastered: nz(stats.mastered) });
+    var ei = ST.expInfo();
+    RANK.report({
+      learned: nz(stats.totalWords),
+      mastered: nz(stats.mastered),
+      exp: ei.exp,
+      level: ei.level
+    });
   }
 
   /* -------- 自由回顾：翻看今天背过的单词（只读，不影响进度） -------- */
@@ -1745,11 +1761,17 @@
         break;
       }
 
-      case "checkin":
+      case "checkin": {
+        var beforeLv = ST.expInfo().level;
         ST.checkIn(TODAY);
-        toast("打卡成功 🎉", "ok");
+        var ei = ST.expInfo();
+        toast(ei.level > beforeLv
+          ? "打卡成功 🎉 +3 经验 · 升到 Lv." + ei.level + "！"
+          : "打卡成功 🎉 +3 经验（" + ei.into + "/" + ei.need + "）", "ok");
+        reportRank();
         render();
         break;
+      }
       case "cancel-checkin":
         ST.cancelCheckIn(TODAY);
         toast("已撤销今日打卡");

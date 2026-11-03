@@ -88,7 +88,9 @@
       pending: [],
       cursor: {},
       days: {},
-      custom: []
+      custom: [],
+      exp: 0,
+      expDay: ""
     };
   }
 
@@ -125,7 +127,9 @@
           pending: Array.isArray(parsed.pending) ? parsed.pending.filter(function (x) { return typeof x === "string"; }) : [],
           cursor: parsed.cursor && typeof parsed.cursor === "object" ? parsed.cursor : {},
           days: parsed.days && typeof parsed.days === "object" ? parsed.days : {},
-          custom: Array.isArray(parsed.custom) ? parsed.custom : []
+          custom: Array.isArray(parsed.custom) ? parsed.custom : [],
+          exp: clamp(Number(parsed.exp) || 0, 0, 9999999),
+          expDay: typeof parsed.expDay === "string" ? parsed.expDay : ""
         };
         if (!Array.isArray(S.settings.books) || !S.settings.books.length) S.settings.books = ["kaoyan"];
       } catch (e) {
@@ -513,6 +517,11 @@
     var d = day(t);
     d.checkedIn = true;
     d.checkedAt = Date.now();
+    // 每日首次打卡 +3 经验（撤销后再打卡不重复计，防刷）
+    if (S.expDay !== t) {
+      S.expDay = t;
+      S.exp = clamp((S.exp || 0) + 3, 0, 9999999);
+    }
     save();
     return d;
   }
@@ -521,6 +530,34 @@
     var t = SRS.todayKey(today);
     day(t).checkedIn = false;
     save();
+  }
+
+  /* ---------------- 经验与等级 ---------------- */
+  /** 每升 1 级需要 15 经验（每天打卡 +3，坚持 5 天升一级） */
+  var EXP_PER_LEVEL = 15;
+
+  function expInfo() {
+    var exp = S.exp || 0;
+    var level = Math.floor(exp / EXP_PER_LEVEL) + 1;
+    var into = exp % EXP_PER_LEVEL;
+    return {
+      exp: exp,
+      level: level,
+      into: into,
+      need: EXP_PER_LEVEL,
+      pct: pct0(into, EXP_PER_LEVEL)
+    };
+  }
+
+  function pct0(a, b) {
+    if (!b) return 0;
+    return Math.max(0, Math.min(100, Math.round((a / b) * 100)));
+  }
+
+  function addExp(n, today) {
+    S.exp = clamp((S.exp || 0) + n, 0, 9999999);
+    save();
+    return expInfo();
   }
 
   /* ---------------- 统计 ---------------- */
@@ -832,6 +869,8 @@
     recordQuiz: recordQuiz,
     checkIn: checkIn,
     cancelCheckIn: cancelCheckIn,
+    expInfo: expInfo,
+    addExp: addExp,
     stats: stats,
     parseWordLines: parseWordLines,
     addCustomBook: addCustomBook,

@@ -110,10 +110,11 @@
     }
   } catch (e) { cloud = null; }
 
-  /** 上报当前段位与学习进度（安静失败） */
+  /** 上报当前段位、等级与学习进度（安静失败） */
   function report(extra) {
     if (!cloud) return Promise.resolve(false);
     var d = state;
+    var exp = Math.max(0, Math.min(999999, (extra && extra.exp) | 0));
     var row = {
       player_id: d.pid,
       nickname: (d.nick || "匿名同学").slice(0, 20),
@@ -122,6 +123,8 @@
       learned: Math.max(0, (extra && extra.learned) | 0),
       mastered: Math.max(0, (extra && extra.mastered) | 0),
       best_streak: Math.max(0, Math.min(9999, d.best | 0)),
+      exp: exp,
+      level: Math.max(1, Math.min(9999, (extra && extra.level) | 0 || Math.floor(exp / 15) + 1)),
       updated_at: new Date().toISOString()
     };
     return cloud.database.from(TABLE).upsert(row, { onConflict: "player_id" }).then(function (res) {
@@ -133,7 +136,7 @@
   function fetchBoard(limit) {
     if (!cloud) return Promise.resolve({ error: { message: "排行榜服务暂时不可用" }, data: null });
     return cloud.database.from(TABLE)
-      .select("player_id, nickname, tier, stars, learned, mastered, best_streak, updated_at")
+      .select("player_id, nickname, tier, stars, learned, mastered, best_streak, exp, level, updated_at")
       .order("stars", { ascending: false })
       .order("learned", { ascending: false })
       .limit(limit || 50)
