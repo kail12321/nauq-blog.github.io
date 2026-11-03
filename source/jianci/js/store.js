@@ -99,17 +99,21 @@
   var _index = null;
   var _all = null;
   var _morph = null;
+  var _morphStats = null;
 
   function invalidate() {
     _index = null;
     _all = null;
     _morph = null;
+    _morphStats = null;
   }
 
   /** 词库按需加载完成后调用：重建单词索引（供 lazy-data.js 回调） */
   function refreshIndex() {
     _index = null;
     _all = null;
+    _morph = null;
+    _morphStats = null;
   }
 
   /** 词书选择变化后：清掉不属于当前词书的待学词，再按今日配额从新词书重新分配 */
@@ -277,6 +281,11 @@
     return morphLib().length > 0;
   }
 
+  /** 词根反查索引是否已建好（未建好时「词根」页先显示骨架屏） */
+  function morphReady() {
+    return !!(MORPH && _morph);
+  }
+
   /** 拆解一个单词：{parts, rest, coverage, complete, line} */
   function analysisOf(word) {
     if (!MORPH || !word) return null;
@@ -303,8 +312,9 @@
     return _morph;
   }
 
-  /** 词根词缀库 + 命中统计，供「词根」页使用 */
+  /** 词根词缀库 + 命中统计，供「词根」页使用（结果缓存，词库变化时随索引一起失效） */
   function morphStats() {
+    if (_morphStats) return _morphStats;
     var lib = morphLib();
     var idx = morphIndex();
     var hit = 0;
@@ -317,13 +327,14 @@
     allWords().forEach(function (w) {
       if (MORPH && MORPH.analyze(w.word, G.MORPH_DATA || null).parts.length) covered++;
     });
-    return {
+    _morphStats = {
       total: lib.length,
       hit: hit,
       byKind: byKind,
       words: allWords().length,
       covered: covered
     };
+    return _morphStats;
   }
 
   /** 搜索词根词缀 */
@@ -878,6 +889,7 @@
     bookProgress: bookProgress,
     morphLib: morphLib,
     hasMorph: hasMorph,
+    morphReady: morphReady,
     analysisOf: analysisOf,
     siblingsOf: siblingsOf,
     morphIndex: morphIndex,

@@ -527,7 +527,12 @@ kbd {
 .root-seg { display: flex; }
 .root-list { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
 
-.rcard { background: var(--card-2); border: 1px solid var(--line-2); border-left-width: 3px; border-radius: 12px; padding: 12px 14px; }
+.rcard {
+  background: var(--card-2); border: 1px solid var(--line-2); border-left-width: 3px; border-radius: 12px; padding: 12px 14px;
+  /* 长列表流畅度：视口外的卡片跳过布局与绘制 */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 120px;
+}
 .rcard.k-prefix { border-left-color: var(--accent); }
 .rcard.k-root { border-left-color: var(--warn); }
 .rcard.k-suffix { border-left-color: var(--ok); }

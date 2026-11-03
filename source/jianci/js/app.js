@@ -22,6 +22,7 @@
   var view = "today";
   var rootQ = ""; // 词根页：搜索词
   var rootKind = "all"; // 词根页：前缀 / 词根 / 后缀 筛选
+  var rootSearchTimer = 0; // 词根页：搜索防抖
   var session = null;
   var toastTimer = null;
   var inputCache = "";
@@ -700,6 +701,24 @@
         '<div class="card empty">没有读到词根词缀库。<br>确认 js/data/ 里的 morph-prefix.js、morph-suffix.js、morph-root-a.js、morph-root-m.js 都在。</div>';
       return;
     }
+    // 索引没建好时（首次进入 / 词库刚加载完），先上骨架屏，把重计算挪到下一帧：
+    // 反查索引要拆解全词库几千个词，同步做会卡住切页动画
+    if (!ST.morphReady()) {
+      box.innerHTML =
+        '<div class="card root-top"><div class="data-loading"><div class="spinner"></div>' +
+        "<b>正在拆解词库、建立词根索引…</b>" +
+        '<div class="muted">只需要一次，之后进入就是秒开</div></div></div>' +
+        '<div class="card root-list" id="rootList"></div>';
+      setTimeout(function () {
+        if (view !== "roots") return;
+        renderRootsFill(box);
+      }, 40);
+      return;
+    }
+    renderRootsFill(box);
+  }
+
+  function renderRootsFill(box) {
     var st = ST.morphStats();
     var list = rootResults();
 
@@ -2179,7 +2198,9 @@
     var t = e.target;
     if (t && t.id === "rootQ") {
       rootQ = t.value;
-      renderRootList();
+      // 防抖：每敲一个字都要过滤 + 排序 + 重建上百张卡片，等停顿后再刷列表
+      if (rootSearchTimer) clearTimeout(rootSearchTimer);
+      rootSearchTimer = setTimeout(renderRootList, 140);
     }
   });
 
