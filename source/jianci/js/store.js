@@ -105,6 +105,12 @@
     _morph = null;
   }
 
+  /** 词库按需加载完成后调用：重建单词索引（供 lazy-data.js 回调） */
+  function refreshIndex() {
+    _index = null;
+    _all = null;
+  }
+
   function clamp(n, lo, hi) {
     n = Number(n);
     if (!isFinite(n)) n = lo;
@@ -846,6 +852,7 @@
     settings: settings,
     library: library,
     bookById: bookById,
+    refreshIndex: refreshIndex,
     selectedBooks: selectedBooks,
     wordById: wordById,
     allWords: allWords,

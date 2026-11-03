@@ -416,7 +416,26 @@
   function renderBooks() {
     var s = ST.settings();
     var lib = ST.library();
-    var html = '<div class="sec-title">内置词书</div><div class="book-grid">';
+    // 大纲/托福词库按需加载：未就绪时给提示并后台拉取，到位后自动刷新数字
+    var waitingFull = LAZY.KEYS.filter(function (k) { return !LAZY.loaded(k) && !loadFailed[k]; });
+    var notice = "";
+    if (waitingFull.length) {
+      var names = waitingFull.map(function (k) {
+        var b = ST.bookById(fullKeyBook(k));
+        return esc(b ? b.name : k);
+      });
+      notice = '<div class="card data-loading sm"><div class="spinner"></div>' +
+        "<span>大纲词库后台加载中（" + names.join("、") + "），数字就绪后自动刷新</span></div>";
+      waitingFull.forEach(function (k) {
+        LAZY.load(k).then(function () {
+          if (view === "books") render();
+        }).catch(function () {
+          loadFailed[k] = true;
+          if (view === "books") render();
+        });
+      });
+    }
+    var html = notice + '<div class="sec-title">内置词书</div><div class="book-grid">';
 
     lib.forEach(function (b) {
       var pr = ST.bookProgress(b.id);
@@ -1065,6 +1084,61 @@
 
   /* ==================== 总渲染 ==================== */
 
+  /* ---------------- 词库按需加载门控 ---------------- */
+  var LAZY = window.JC_LAZY;
+  var loadFailed = {}; // 加载失败的词库键：降级为精讲词，不无限重试
+
+  /** 全量词库键 → 所属词书 id 的映射 */
+  function fullKeyBook(key) {
+    if (key === "toefl") return "toefl";
+    return key.replace(/-full$/, "");
+  }
+
+  /** 当前计划用到的全量词库键（学习/统计/排位都依赖） */
+  function neededFullKeys() {
+    var keys = [];
+    (ST.state().settings.books || []).forEach(function (id) {
+      if (id === "kaoyan") keys.push("kaoyan-full");
+      else if (id === "cet6") keys.push("cet6-full");
+      else if (id === "toefl") keys.push("toefl");
+    });
+    return keys;
+  }
+
+  /** 是否还有未就绪且未失败的全量词库 */
+  function dataWaiting() {
+    return neededFullKeys().some(function (k) {
+      return !LAZY.loaded(k) && !loadFailed[k];
+    });
+  }
+
+  var dataLoading = false;
+  function startDataLoads() {
+    if (dataLoading) return;
+    var need = neededFullKeys().filter(function (k) { return !LAZY.loaded(k) && !loadFailed[k]; });
+    if (!need.length) return;
+    dataLoading = true;
+    Promise.all(need.map(function (k) { return LAZY.load(k); }))
+      .catch(function (e) {
+        need.forEach(function (k) { loadFailed[k] = true; });
+        toast("部分词库下载失败，先用精讲词学习，稍后可在「词书」页重试", "err");
+      })
+      .then(function () {
+        dataLoading = false;
+        render();
+      });
+  }
+
+  function loadingHtml() {
+    var names = neededFullKeys()
+      .filter(function (k) { return !LAZY.loaded(k) && !loadFailed[k]; })
+      .map(function (k) { return esc(ST.bookById(fullKeyBook(k)) ? ST.bookById(fullKeyBook(k)).name : k); });
+    return '<div class="card data-loading"><div class="spinner"></div>' +
+      "<b>词库加载中…</b>" +
+      '<div class="muted" style="margin-top:6px">正在下载 ' + (names.join("、") || "词库") +
+      "，只加载这一次，之后有浏览器缓存就快了</div></div>";
+  }
+
   /** 把毛玻璃滑块移动到当前激活的标签下方 */
   function moveTabPill(instant) {
     var tabsEl = document.getElementById("tabs");
@@ -1102,6 +1176,14 @@
       tabs[i].classList.toggle("active", tabs[i].getAttribute("data-view") === view);
     }
     moveTabPill(false);
+
+    // 学习/统计/排位依赖全量词库：未就绪时先显示加载态，数据到位后自动重渲染
+    if ((view === "today" || view === "stats" || view === "rank") && dataWaiting()) {
+      $("#view-" + view).innerHTML = loadingHtml();
+      startDataLoads();
+      return;
+    }
+
     if (view === "today") renderToday();
     else if (view === "books") renderBooks();
     else if (view === "roots") renderRoots();
