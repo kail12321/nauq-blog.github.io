@@ -82,7 +82,8 @@
         checkinRule: "all",
         autoSpeak: true,
         theme: "auto",
-        showSimilar: true
+        showSimilar: true,
+        lockMode: false
       },
       words: {},
       pending: [],

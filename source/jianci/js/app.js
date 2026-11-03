@@ -795,6 +795,12 @@
 
     html += "</div>";
 
+    html += '<div class="sec-title">专注锁机</div><div class="card set-list">';
+    html +=
+      '<div class="set-row"><div class="set-main"><div class="set-name">锁机模式</div><div class="set-desc">今日任务背完前锁住退出：开始学习时自动全屏、屏幕常亮，中途切走会记一次「逃跑」。完成今日任务的 1/3 后，点左上角 🔓 可选择退出</div></div>' +
+      '<button class="switch' + (s.lockMode ? " on" : "") + '" data-act="toggle-lock"></button></div>';
+    html += "</div>";
+
     // 记忆曲线说明
     html +=
       '<div class="sec-title">记忆曲线怎么安排的</div><div class="card"><div class="note">' +
@@ -1212,6 +1218,7 @@
     $("#overlay").hidden = false;
     $("#ovTitle").textContent = title;
     document.body.style.overflow = "hidden";
+    if (lockActive()) lockEnter();
   }
 
   function closeOverlay() {
@@ -1219,7 +1226,97 @@
     session = null;
     $("#overlay").hidden = true;
     document.body.style.overflow = "";
+    lockExitFx();
     render();
+  }
+
+  /* ---------------- 锁机专注模式 ----------------
+     网页拿不到系统级权限，无法真的锁死手机，
+     这里做「最强近似」：自动全屏 + 屏幕常亮 +
+     锁住所有退出入口 + 切走记录逃跑；
+     今日任务完成到 1/3 后，出现「选择退出」。 */
+  var lockWakeLock = null;
+  var lockLeftAt = 0;
+
+  /** 今日任务进度（done/total 与首页进度环一致） */
+  function lockProgress() {
+    var p = ST.plan(TODAY);
+    var done = nz(p.newTarget) - nz(p.newPending) + nz(p.reviewedToday) + Math.min(nz(p.quizDone), nz(p.quizTarget));
+    var total = nz(p.newTarget) + nz(p.reviewTarget) + nz(p.quizTarget);
+    return { done: done, total: total, ratio: total ? done / total : 1 };
+  }
+
+  /** 锁机是否生效：开关打开且今日任务未全部完成 */
+  function lockActive() {
+    if (!ST.settings().lockMode) return false;
+    var p = ST.plan(TODAY);
+    return !(p.newDone && p.reviewDone && p.quizDoneFlag);
+  }
+
+  /** 是否到达 1/3 退出点 */
+  function lockCanExit() {
+    var lp = lockProgress();
+    return lp.total === 0 || lp.done * 3 >= lp.total;
+  }
+
+  /** 进入锁机：全屏 + 屏幕常亮（尽力而为，失败不影响使用） */
+  function lockEnter() {
+    lockLeftAt = 0;
+    try {
+      var el = document.documentElement;
+      if (el.requestFullscreen) {
+        var r = el.requestFullscreen();
+        if (r && r.catch) r.catch(function () {});
+      }
+    } catch (e) {}
+    try {
+      if (navigator.wakeLock && navigator.wakeLock.request) {
+        navigator.wakeLock.request("screen").then(function (wl) {
+          lockWakeLock = wl;
+        }).catch(function () { lockWakeLock = null; });
+      }
+    } catch (e) {}
+  }
+
+  /** 解除锁机的浏览器侧效果 */
+  function lockExitFx() {
+    if (lockWakeLock) {
+      try { lockWakeLock.release(); } catch (e) {}
+      lockWakeLock = null;
+    }
+    try {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        var r = document.exitFullscreen();
+        if (r && r.catch) r.catch(function () {});
+      }
+    } catch (e) {}
+  }
+
+  function recordEscape() {
+    var d = ST.day(TODAY);
+    d.escapes = nz(d.escapes) + 1;
+    ST.save();
+  }
+
+  /** 所有退出入口（✕ / 先休息 / ESC）统一走这里，锁机时拦截 */
+  function tryExitSession() {
+    if (lockActive()) {
+      if (lockCanExit()) {
+        var lp = lockProgress();
+        if (window.confirm("已完成今日任务 " + lp.done + "/" + lp.total + "（超过 1/3）。\n确定要退出锁机吗？将记一次「逃跑」。")) {
+          recordEscape();
+          if (session && session.mode === "rank") reportRank();
+          closeOverlay();
+          toast("已退出锁机 · 加油，剩下的部分随时回来继续");
+        }
+      } else {
+        var lp2 = lockProgress();
+        toast("🔒 锁机中：完成 " + lp2.done + "/" + lp2.total + "，背到 1/3（" + Math.ceil(lp2.total / 3) + "）后可选择退出");
+      }
+      return;
+    }
+    if (session && session.mode === "rank") reportRank();
+    closeOverlay();
   }
 
   function flushTime() {
@@ -1266,6 +1363,7 @@
       };
       openOverlay("单词填空 · 巩固");
     }
+    if (lockActive()) toast("🔒 锁机专注中：完成今日任务的 1/3 前无法退出");
     renderSession();
   }
 
@@ -1280,6 +1378,8 @@
 
   function renderSession() {
     if (!session) return;
+    var ovClose = $("#ovClose");
+    if (ovClose) ovClose.textContent = lockActive() ? (lockCanExit() ? "🔓" : "🔒") : "✕";
     $("#ovCount").textContent = progressText();
     var ratio;
     if (session.mode === "quiz") {
@@ -1847,8 +1947,7 @@
         startSession("review");
         break;
       case "exit-session":
-        if (session && session.mode === "rank") reportRank();
-        closeOverlay();
+        tryExitSession();
         break;
 
       case "quiz-submit":
@@ -2030,6 +2129,13 @@
         render();
         break;
 
+      case "toggle-lock":
+        s.lockMode = !s.lockMode;
+        ST.save();
+        render();
+        toast(s.lockMode ? "🔒 锁机已开启：开始学习时生效" : "锁机已关闭");
+        break;
+
       case "export":
         download("jianci-backup-" + TODAY + ".json", ST.exportJSON());
         toast("备份已导出");
@@ -2105,7 +2211,7 @@
     }
     if (e.key === "Escape") {
       e.preventDefault();
-      closeOverlay();
+      tryExitSession();
       return;
     }
     if (!session) return;
@@ -2197,6 +2303,29 @@
     document.fonts.ready.then(function () { moveTabPill(true); });
   }
   window.addEventListener("resize", function () { moveTabPill(true); });
+
+  // 锁机：切走应用记一次逃跑，回来当面提醒
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+      if (lockActive() && session) lockLeftAt = Date.now();
+    } else if (lockLeftAt) {
+      var away = Date.now() - lockLeftAt;
+      lockLeftAt = 0;
+      if (away > 1500 && session && lockActive()) {
+        recordEscape();
+        var lp = lockProgress();
+        toast("刚才是想逃跑吗？逃跑已被记录 😏 今日进度 " + lp.done + "/" + lp.total);
+      }
+    }
+  });
+
+  // 锁机：学习中途直接关页面先拦一道（桌面端有效）
+  window.addEventListener("beforeunload", function (e) {
+    if (lockActive() && session) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  });
 
   // 首次使用引导
   if (!Object.keys(ST.state().words).length && !ST.state().days[TODAY]) {

@@ -4,7 +4,7 @@
         其余静态资源缓存优先 + 后台更新（stale-while-revalidate）。
    更新站点时把 VERSION 号 +1 即可让所有客户端换新缓存。
    =========================================================== */
-var VERSION = "jianci-v1";
+var VERSION = "jianci-v2";
 
 var CORE = [
   "./index.html",
