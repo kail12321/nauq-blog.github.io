@@ -1348,7 +1348,7 @@
     }
   }
 
-  /** 慢动作斩词特效：刀光斜劈 + 单词切成两半飘开 + 粒子迸溅，结束后回调 */
+  /** 慢动作斩词特效：大月牙弧光扫斩 + 扇形放射光线（源自用户提供的参考视频），两半分离，结束后回调 */
   function playSlashFx(done) {
     var card = document.querySelector("#ovBody .scard");
     var line = card && card.querySelector(".word-line");
@@ -1356,24 +1356,37 @@
     if (!line || !wordEl) { done(); return; }
     var text = wordEl.textContent;
 
-    // 粒子：随机方向迸溅
-    var sparks = "";
+    // 扇形放射光线：近水平对角、长短不一（视频中光线残影特征）
+    var rays = "";
     for (var i = 0; i < 12; i++) {
-      var ang = (Math.PI * 2 * i) / 12 + (Math.random() - 0.5) * 0.6;
-      var dist = 42 + Math.random() * 64;
-      sparks += '<i style="--dx:' + (Math.cos(ang) * dist).toFixed(0) + "px;--dy:" +
-        (Math.sin(ang) * dist).toFixed(0) + "px;animation-delay:" + (Math.random() * 0.14).toFixed(2) + 's"></i>';
+      var ang = -76 + (152 * i) / 11 + (Math.random() - 0.5) * 14;
+      var len = 80 + Math.random() * 130;
+      var d = (Math.random() * 0.1).toFixed(2);
+      rays += '<i style="--ang:' + ang.toFixed(0) + "deg;--len:" + len.toFixed(0) + "px;--d:" + d + 's"></i>';
     }
 
     var fx = document.createElement("div");
     fx.className = "slash-fx";
     fx.innerHTML =
-      '<div class="slash-blade"></div>' +
+      '<svg class="slash-arc" viewBox="0 0 200 200" aria-hidden="true">' +
+      "<defs>" +
+      '<linearGradient id="jcArcG" x1="0" y1="1" x2="1" y2="0">' +
+      '<stop offset="0" stop-color="#ffffff" stop-opacity="0"/>' +
+      '<stop offset="0.45" stop-color="#ffffff" stop-opacity="1"/>' +
+      '<stop offset="0.62" stop-color="#dff1ff" stop-opacity="0.95"/>' +
+      '<stop offset="1" stop-color="#ffffff" stop-opacity="0"/>' +
+      "</linearGradient>" +
+      '<filter id="jcArcBlur"><feGaussianBlur stdDeviation="3"/></filter>' +
+      "</defs>" +
+      // 月牙弧光：外弧+内弧构成中间粗两头尖的月牙
+      '<path class="arc-glow" d="M16,158 Q104,6 188,102 Q100,50 16,158 Z" fill="url(#jcArcG)" filter="url(#jcArcBlur)"/>' +
+      '<path class="arc-core" d="M16,158 Q104,6 188,102 Q100,50 16,158 Z" fill="url(#jcArcG)"/>' +
+      "</svg>" +
+      '<div class="slash-rays">' + rays + "</div>" +
       '<div class="slash-clip top"><span class="word">' + esc(text) + "</span></div>" +
-      '<div class="slash-clip bot"><span class="word">' + esc(text) + "</span></div>" +
-      '<div class="slash-sparks">' + sparks + "</div>";
+      '<div class="slash-clip bot"><span class="word">' + esc(text) + "</span></div>";
 
-    // 让特效层精确覆盖在单词上
+    // 让特效层精确覆盖在单词上（弧光可超出框）
     var r = wordEl.getBoundingClientRect();
     var lr = line.getBoundingClientRect();
     fx.style.left = r.left - lr.left - 10 + "px";

@@ -770,40 +770,41 @@ iframe.board-frame { margin-top: 2px; height: 460px; }
   100% { opacity: 0; transform: translate(17px, 32px) rotate(5deg); filter: brightness(1.35); }
 }
 
-/* 刀光：细长光刃从左侧扫入，带辉光 */
-.slash-blade {
-  position: absolute; left: -12%; top: 50%;
-  width: 124%; height: 2.5px;
-  background: linear-gradient(90deg, transparent 0%, #fff 16%, #c9ecff 50%, #fff 84%, transparent 100%);
-  box-shadow:
-    0 0 10px 2px rgba(150, 215, 255, 0.95),
-    0 0 28px 8px rgba(110, 175, 255, 0.45);
-  border-radius: 999px;
-  transform: translateY(-50%) rotate(-8deg) scaleX(0);
-  transform-origin: 32% 50%;
+/* 月牙弧光（大弧扫斩，取自参考视频的白色弧形刀光） */
+.slash-arc {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 300px; height: 300px;
+  margin-left: -150px; margin-top: -150px;
+  overflow: visible;
   opacity: 0;
+  transform: rotate(-46deg) scale(0.72);
+  transform-origin: 12% 88%;
+  filter: drop-shadow(0 0 10px rgba(170, 220, 255, 0.8)) drop-shadow(0 0 22px rgba(130, 190, 255, 0.4));
 }
-.slash-fx.go .slash-blade { animation: bladeSweep 0.52s cubic-bezier(0.16, 0.84, 0.3, 1) 0.06s forwards; }
-@keyframes bladeSweep {
-  0% { opacity: 0; transform: translateY(-50%) rotate(-8deg) scaleX(0); }
-  22% { opacity: 1; }
-  58% { opacity: 1; transform: translateY(-50%) rotate(-8deg) scaleX(1); }
-  100% { opacity: 0; transform: translateY(-50%) rotate(-8deg) scaleX(1); }
+.slash-fx.go .slash-arc { animation: arcSwing 0.5s cubic-bezier(0.14, 0.8, 0.3, 1) 0.05s forwards; }
+@keyframes arcSwing {
+  0% { opacity: 0; transform: rotate(-46deg) scale(0.72); }
+  28% { opacity: 1; }
+  62% { opacity: 1; transform: rotate(10deg) scale(1); }
+  100% { opacity: 0; transform: rotate(16deg) scale(1.06); }
 }
 
-/* 迸溅粒子 */
-.slash-sparks { position: absolute; inset: 0; }
-.slash-sparks i {
+/* 扇形放射光线（近水平残影，取自参考视频） */
+.slash-rays { position: absolute; inset: 0; }
+.slash-rays i {
   position: absolute; left: 50%; top: 50%;
-  width: 5px; height: 5px; border-radius: 50%;
-  background: radial-gradient(circle, #fff 0%, #a5daff 55%, transparent 100%);
-  box-shadow: 0 0 7px 1px rgba(150, 215, 255, 0.85);
+  width: var(--len); height: 2px;
+  background: linear-gradient(90deg, transparent, #fff 42%, #d8efff 58%, transparent);
+  box-shadow: 0 0 7px 1px rgba(190, 228, 255, 0.75);
+  border-radius: 999px;
   opacity: 0;
-  transform: translate(-50%, -50%) scale(0.4);
-  animation: sparkFly 0.62s ease-out forwards;
+  transform: rotate(var(--ang)) scaleX(0);
+  transform-origin: 0 50%;
+  animation: rayOut 0.55s cubic-bezier(0.2, 0.8, 0.4, 1) var(--d) forwards;
 }
-@keyframes sparkFly {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
-  18% { opacity: 1; transform: translate(calc(-50% + var(--dx) * 0.25), calc(-50% + var(--dy) * 0.25)) scale(1.15); }
-  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.6); }
+@keyframes rayOut {
+  0% { opacity: 0; transform: rotate(var(--ang)) scaleX(0); }
+  16% { opacity: 0.95; transform: rotate(var(--ang)) scaleX(0.72); }
+  100% { opacity: 0; transform: rotate(var(--ang)) scaleX(1); }
 }
