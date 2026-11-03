@@ -6,6 +6,14 @@
 <title>简词 · 每天一点点</title>
 <meta name="description" content="简洁的背单词工具：考研 / 雅思 / 六级词书，按记忆曲线复习，例句 + 词根词缀 + 形近词 + 变形 + 单词填空巩固。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f6ef7'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E7%AE%80%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f6fa">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0e1118">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="简词">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -96,5 +104,13 @@
 <script defer src="js/store.js"></script>
 <script defer src="js/rank.js"></script>
 <script defer src="js/app.js"></script>
+<script>
+/* PWA：注册 Service Worker（可安装、离线可开） */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function () { /* 无痕模式等场景静默失败 */ });
+  });
+}
+</script>
 </body>
 </html>

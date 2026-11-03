@@ -69,7 +69,7 @@ body {
   transition: background 0.25s ease, color 0.25s ease;
 }
 
-button { font-family: inherit; cursor: pointer; }
+button { font-family: inherit; cursor: pointer; touch-action: manipulation; }
 a { color: inherit; text-decoration: none; }
 
 .wrap { width: 100%; max-width: 880px; margin: 0 auto; padding: 0 18px; }
@@ -83,7 +83,7 @@ a { color: inherit; text-decoration: none; }
   backdrop-filter: saturate(160%) blur(12px);
   border-bottom: 1px solid var(--line-2);
 }
-.topbar-in { display: flex; align-items: center; gap: 14px; height: 60px; }
+.topbar-in { display: flex; align-items: center; gap: 14px; min-height: 60px; padding-top: env(safe-area-inset-top, 0px); }
 .brand { display: flex; align-items: center; gap: 9px; flex-shrink: 0; }
 .logo {
   width: 30px; height: 30px; border-radius: 9px;
@@ -567,22 +567,47 @@ kbd {
 .morph-sib-label { font-size: 11.5px; color: var(--muted); margin-right: 2px; }
 
 @media (max-width: 620px) {
-  .tabs { --pad: 2px; gap: 0; padding: var(--pad); }
-  .tab { padding: 6px 8px; font-size: 12.5px; white-space: nowrap; }
+  /* 顶栏精简：品牌 + 主题按钮 */
+  .topbar-in { min-height: 52px; gap: 10px; }
   .brand-txt i { display: none; }
+
+  /* 底部导航 Dock（App 式），带 iOS 安全区 */
+  .tabs {
+    --pad: 3px;
+    position: fixed; left: 50%;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    z-index: 45;
+    margin: 0;
+    width: min(100vw - 20px, 440px);
+    gap: 0;
+    padding: var(--pad);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--card) 84%, transparent);
+    -webkit-backdrop-filter: saturate(160%) blur(14px);
+    backdrop-filter: saturate(160%) blur(14px);
+    border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    box-shadow: 0 10px 34px rgba(22, 32, 60, 0.16);
+  }
+  .tab { flex: 1; padding: 10px 2px; font-size: 12.5px; white-space: nowrap; }
+  body { padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
+
   .hero { padding: 18px; gap: 14px; }
   .hero-title { font-size: 19px; }
   .ring { width: 70px; height: 70px; }
   .ring span { font-size: 15px; }
-  .word { font-size: 32px; }
+  .word { font-size: 30px; }
+  .card { padding: 16px; }
   .task { padding: 13px 14px; gap: 11px; }
   .task-icon { width: 34px; height: 34px; }
   .rate-bar { grid-template-columns: repeat(3, 1fr); gap: 7px; }
-  .rate-btn { padding: 11px 4px; font-size: 13.5px; }
+  .rate-btn { padding: 12px 4px; font-size: 13.5px; }
   .rate-btn small { display: none; }
   .week { gap: 5px; }
   .week-day { padding: 8px 2px; }
   .heat i { width: 10px; height: 10px; }
+  iframe.cloud-frame { height: 460px; }
+  iframe.board-frame { height: 420px; }
 }
 /* ── 社区：投稿邮箱 + 评论区 ── */
 .community { margin-top: 28px; }
