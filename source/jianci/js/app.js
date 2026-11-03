@@ -1065,6 +1065,32 @@
 
   /* ==================== 总渲染 ==================== */
 
+  /** 把毛玻璃滑块移动到当前激活的标签下方 */
+  function moveTabPill(instant) {
+    var tabsEl = document.getElementById("tabs");
+    if (!tabsEl) return;
+    var pill = tabsEl.querySelector(".tab-pill");
+    if (!pill) return;
+    var tabs = tabsEl.querySelectorAll(".tab");
+    var act = null;
+    for (var i = 0; i < tabs.length; i++) {
+      if (tabs[i].classList.contains("active")) { act = tabs[i]; break; }
+    }
+    if (!act) { pill.classList.remove("on"); return; }
+    pill.classList.add("on");
+    if (instant) {
+      pill.classList.add("no-anim");
+      void pill.offsetWidth; // 强制回流，让下一次变化带动画
+    }
+    pill.style.width = act.offsetWidth + "px";
+    pill.style.transform = "translateX(" + act.offsetLeft + "px)";
+    if (instant) {
+      requestAnimationFrame(function () {
+        pill.classList.remove("no-anim");
+      });
+    }
+  }
+
   function render() {
     applyTheme();
     VIEWS.forEach(function (v) {
@@ -1075,6 +1101,7 @@
     for (var i = 0; i < tabs.length; i++) {
       tabs[i].classList.toggle("active", tabs[i].getAttribute("data-view") === view);
     }
+    moveTabPill(false);
     if (view === "today") renderToday();
     else if (view === "books") renderBooks();
     else if (view === "roots") renderRoots();
@@ -2013,6 +2040,13 @@
   var initial = String(location.hash || "").replace("#", "");
   view = VIEWS.indexOf(initial) >= 0 ? initial : "today";
   render();
+  moveTabPill(true); // 首次直接落位，不带滑动
+
+  // 字体加载完成后宽度可能变化，重新校准滑块
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { moveTabPill(true); });
+  }
+  window.addEventListener("resize", function () { moveTabPill(true); });
 
   // 首次使用引导
   if (!Object.keys(ST.state().words).length && !ST.state().days[TODAY]) {
