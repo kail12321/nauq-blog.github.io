@@ -353,12 +353,15 @@
 
     // 排位赛入口
     var rankPool = ST.day(TODAY).reviewIds.map(ST.wordById).filter(Boolean);
+    var recallCount = recallList().length;
     var rt = RANK.tierInfo(RANK.state().tier);
     html += '<div class="card rank-entry" style="--tc:' + rt.color + '">' +
       '<div class="row between">' +
       '<div><b>' + rt.icon + " 当前段位：" + esc(rt.name) + "</b>" +
-      '<div class="muted" style="margin-top:3px">今天已复习 <b>' + rankPool.length + "</b> 个词，可随时开一场排位赛（连对 15 词升 1 星）</div></div>" +
-      '<button class="btn sm" data-act="nav" data-view="rank">去排位</button>' +
+      '<div class="muted" style="margin-top:3px">今天背了 <b>' + recallCount + "</b> 个词 · 已复习 <b>" + rankPool.length + "</b> 个可参赛（连对 15 词升 1 星）</div></div>" +
+      '<div class="row" style="gap:8px">' +
+      '<button class="btn sm" data-act="start-recall"' + (recallCount ? "" : " disabled") + ">📖 回顾</button>" +
+      '<button class="btn primary sm" data-act="nav" data-view="rank">去排位</button>' +
       "</div></div>";
 
     // 打卡
@@ -1021,6 +1024,58 @@
     RANK.report({ learned: nz(stats.totalWords), mastered: nz(stats.mastered) });
   }
 
+  /* -------- 自由回顾：翻看今天背过的单词（只读，不影响进度） -------- */
+
+  function recallList() {
+    var d = ST.day(TODAY);
+    var seen = {};
+    var out = [];
+    d.reviewIds.concat(d.newIds).concat(d.wrongIds).forEach(function (id) {
+      if (seen[id]) return;
+      seen[id] = 1;
+      var w = ST.wordById(id);
+      if (w) out.push(w);
+    });
+    return out;
+  }
+
+  function startRecall() {
+    var list = recallList();
+    if (!list.length) return toast("今天还没背过单词，先学几个再来回顾");
+    session = { mode: "recall", list: list, idx: 0, started: Date.now() };
+    openOverlay("📖 回顾今日单词");
+    renderSession();
+  }
+
+  function renderRecall() {
+    var list = session.list;
+    var i = session.idx;
+    var w = list[i];
+    var html = '<div class="recall-nav">' +
+      '<button class="btn ghost sm" data-act="recall-prev"' + (i === 0 ? " disabled" : "") + ">← 上一个</button>" +
+      '<span class="muted">' + (i + 1) + " / " + list.length + "</span>" +
+      '<button class="btn ghost sm" data-act="recall-next"' + (i === list.length - 1 ? " disabled" : "") + ">下一个 →</button>" +
+      "</div>";
+    html += '<div class="scard">' +
+      '<div class="word-line"><span class="word">' + esc(w.word) + "</span>" +
+      '<button class="speak-btn" data-act="speak-current" title="朗读">🔊</button></div>' +
+      (w.phonetic ? '<div class="phonetic">' + esc(w.phonetic) + "</div>" : "") +
+      '<div class="meaning">' + (w.pos ? '<span class="pos">' + esc(w.pos) + "</span>" : "") + esc(w.meaning) + "</div>" +
+      '<div class="detail">' + fullDetails(w) + "</div>" +
+      "</div>";
+    html += '<div class="kbd-hint">按 <kbd>←</kbd> <kbd>→</kbd> 或点击按钮切换 · 回顾不影响记忆进度</div>';
+    html += '<div class="ov-foot"><button class="btn ghost" data-act="exit-session">结束回顾</button></div>';
+    $("#ovBody").innerHTML = html;
+  }
+
+  function recallMove(step) {
+    if (!session || session.mode !== "recall") return;
+    var next = session.idx + step;
+    if (next < 0 || next >= session.list.length) return;
+    session.idx = next;
+    renderSession();
+  }
+
   /* ==================== 总渲染 ==================== */
 
   function render() {
@@ -1122,6 +1177,7 @@
     if (!session) return "";
     if (session.mode === "quiz") return session.index + 1 + " / " + session.questions.length + " 题";
     if (session.mode === "rank") return "答对 " + session.right + " / " + session.answered;
+    if (session.mode === "recall") return "回顾 " + (session.idx + 1) + " / " + session.list.length;
     var done = Object.keys(session.seen).length;
     return done + " / " + session.total + " 词";
   }
@@ -1139,6 +1195,7 @@
 
     if (session.mode === "quiz") renderQuiz();
     else if (session.mode === "rank") renderRankQuiz();
+    else if (session.mode === "recall") renderRecall();
     else renderCard();
   }
 
@@ -1578,6 +1635,15 @@
       case "start-rank":
         startRank();
         break;
+      case "start-recall":
+        startRecall();
+        break;
+      case "recall-prev":
+        recallMove(-1);
+        break;
+      case "recall-next":
+        recallMove(1);
+        break;
       case "rank-pick":
         rankPick(Number(t.getAttribute("data-i")));
         break;
@@ -1605,6 +1671,9 @@
       case "speak-current":
         if (session && session.mode === "rank") {
           if (session.q && session.q.word) speak(session.q.word.word);
+        } else if (session && session.mode === "recall") {
+          var wr = session.list[session.idx];
+          if (wr) speak(wr.word);
         } else if (session && session.mode !== "quiz") {
           var w0 = session.queue[0];
           if (w0) speak(w0.word);
@@ -1897,6 +1966,18 @@
         e.preventDefault();
         rankPick(Number(e.key) - 1);
         return;
+      }
+      return;
+    }
+
+    if (session.mode === "recall") {
+      if (typing) return;
+      if (e.key === "ArrowRight" || e.key === " ") {
+        e.preventDefault();
+        recallMove(1);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        recallMove(-1);
       }
       return;
     }

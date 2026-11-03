@@ -619,3 +619,6 @@ kbd {
 .rank-row.me { border-color: var(--accent); }
 .rank-no { width: 30px; text-align: center; font-size: 14px; font-weight: 700; color: var(--muted); flex: none; }
 .rank-meta { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+/* ── 自由回顾 ── */
+.recall-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
