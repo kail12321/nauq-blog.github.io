@@ -569,3 +569,53 @@ kbd {
 .cmt-time { margin-left: auto; font-size: 11.5px; color: var(--muted); }
 .cmt-body { font-size: 14px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
 .cmt-empty { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 0; }
+
+/* ── 排位赛与排行榜 ── */
+.rank-entry { margin-top: 14px; padding: 14px 18px; border-left: 3px solid var(--tc, var(--accent)); }
+.rank-hero { padding: 18px; border-top: 3px solid var(--tc, var(--accent)); }
+.rank-hero-main { display: flex; align-items: center; gap: 14px; }
+.rank-hero-ico { font-size: 40px; line-height: 1; }
+.rank-hero-tier { font-size: 20px; font-weight: 700; }
+.rank-goal { margin-top: 12px; padding: 8px 12px; background: var(--bg-soft); border-radius: 8px; font-size: 13px; color: var(--muted); }
+.rank-goal b { color: var(--accent); }
+.tier-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 999px; font-size: 13.5px; font-weight: 700;
+  background: color-mix(in srgb, var(--tc) 14%, transparent);
+  color: var(--tc); border: 1px solid color-mix(in srgb, var(--tc) 35%, transparent);
+}
+.tier-badge.sm { padding: 2px 10px; font-size: 12.5px; }
+.tier-ico { font-size: 1em; }
+.tier-stars { display: inline-flex; gap: 1px; margin-left: 2px; }
+.tier-stars .star { color: var(--muted); opacity: .35; font-size: .92em; }
+.tier-stars .star.on { color: var(--tc); opacity: 1; }
+.tier-stars.big .star { font-size: 17px; }
+.tiers { display: flex; gap: 8px; flex-wrap: wrap; }
+.tier-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 600;
+  background: color-mix(in srgb, var(--tc) 10%, transparent);
+  color: var(--tc); border: 1px solid color-mix(in srgb, var(--tc) 30%, transparent);
+  opacity: .55;
+}
+.tier-chip.me { opacity: 1; box-shadow: 0 0 0 2px color-mix(in srgb, var(--tc) 35%, transparent); }
+.rank-status { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.rank-streak { font-size: 13.5px; color: var(--muted); }
+.rank-streak b { color: var(--accent); font-size: 16px; }
+.bar.ov-bar2 { height: 6px; border-radius: 999px; background: var(--bg-soft); overflow: hidden; margin-bottom: 14px; }
+.bar.ov-bar2 i { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .3s ease; }
+.rank-card { text-align: center; }
+.rank-opts { display: flex; flex-direction: column; gap: 9px; margin-top: 16px; }
+.rank-opt {
+  text-align: left; padding: 12px 15px; border-radius: 12px;
+  background: var(--bg-soft); border: 1px solid var(--line);
+  color: var(--text); font-size: 14.5px; line-height: 1.55; cursor: pointer;
+  font-family: inherit;
+}
+.rank-opt:hover { border-color: var(--accent); }
+.rank-opt.ok { border-color: var(--ok); background: var(--ok-soft); color: var(--ok); font-weight: 600; }
+.rank-opt.bad { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
+.rank-opt:disabled { cursor: default; }
+.rank-row.me { border-color: var(--accent); }
+.rank-no { width: 30px; text-align: center; font-size: 14px; font-weight: 700; color: var(--muted); flex: none; }
+.rank-meta { margin-left: auto; font-size: 12px; color: var(--muted); }

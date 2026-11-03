@@ -7,6 +7,7 @@
 
   var SRS = window.JC_SRS;
   var ST = window.JC_STORE;
+  var RANK = window.JC_RANK;
 
   if (!SRS || !ST) {
     document.body.innerHTML =
@@ -17,7 +18,7 @@
   ST.load();
 
   var TODAY = SRS.todayKey();
-  var VIEWS = ["today", "books", "roots", "stats", "settings"];
+  var VIEWS = ["today", "books", "roots", "stats", "rank", "settings"];
   var view = "today";
   var rootQ = ""; // 词根页：搜索词
   var rootKind = "all"; // 词根页：前缀 / 词根 / 后缀 筛选
@@ -349,6 +350,16 @@
       "</div>";
 
     html += "</div>";
+
+    // 排位赛入口
+    var rankPool = ST.day(TODAY).reviewIds.map(ST.wordById).filter(Boolean);
+    var rt = RANK.tierInfo(RANK.state().tier);
+    html += '<div class="card rank-entry" style="--tc:' + rt.color + '">' +
+      '<div class="row between">' +
+      '<div><b>' + rt.icon + " 当前段位：" + esc(rt.name) + "</b>" +
+      '<div class="muted" style="margin-top:3px">今天已复习 <b>' + rankPool.length + "</b> 个词，可随时开一场排位赛（连对 15 词升 1 星）</div></div>" +
+      '<button class="btn sm" data-act="nav" data-view="rank">去排位</button>' +
+      "</div></div>";
 
     // 打卡
     var checkinHtml;
@@ -791,6 +802,225 @@
     $("#view-settings").innerHTML = html;
   }
 
+  /* ==================== 排位赛与排行榜 ==================== */
+
+  function tierBadge(tier, stars, small) {
+    var t = RANK.tierInfo(tier);
+    var dots = "";
+    for (var i = 0; i < RANK.STARS_PER_TIER; i++) {
+      dots += '<span class="star' + (i < stars ? " on" : "") + '">★</span>';
+    }
+    return '<span class="tier-badge' + (small ? " sm" : "") + '" style="--tc:' + t.color + '">' +
+      '<span class="tier-ico">' + t.icon + "</span>" + esc(t.name) +
+      '<span class="tier-stars">' + dots + "</span></span>";
+  }
+
+  function renderRank() {
+    var rs = RANK.state();
+    var p = ST.plan(TODAY);
+    var stats = ST.stats(TODAY);
+    var pool = ST.day(TODAY).reviewIds.map(ST.wordById).filter(Boolean);
+    var t = RANK.tierInfo(rs.tier);
+    var totalStars = RANK.totalStars(rs);
+    var maxed = rs.tier >= RANK.TIERS.length - 1 && rs.stars >= RANK.STARS_PER_TIER;
+
+    var html = "";
+    // 我的段位卡
+    html += '<div class="card rank-hero" style="--tc:' + t.color + '">' +
+      '<div class="rank-hero-main">' +
+      '<div class="rank-hero-ico">' + t.icon + "</div>" +
+      '<div class="grow"><div class="rank-hero-tier">' + esc(t.name) +
+      ' <span class="tier-stars big">' + dots3(rs.stars) + "</span></div>" +
+      '<div class="muted">总星数 ' + totalStars + " · 最佳连击 " + nz(rs.best) +
+      " · 已学 " + nz(stats.totalWords) + " 词</div>" +
+      "</div></div>" +
+      '<div class="rank-goal">' + (maxed
+        ? "已达最高段位，传说中的奶娃 👶"
+        : "再连续答对 <b>" + RANK.GOAL + "</b> 个复习词升 1 星") + "</div>" +
+      "</div>";
+
+    // 排位赛入口
+    html += '<div class="card" style="padding:16px 18px">' +
+      '<div class="row between">' +
+      "<div><b>🎯 排位赛</b>" +
+      '<div class="muted" style="margin-top:3px">题目与今天的复习词一致（今天已复习 <b>' + pool.length + "</b> 个）· 连续答对 15 个升 1 星</div></div>" +
+      '<button class="btn primary sm" data-act="start-rank"' + (pool.length ? "" : " disabled") + ">开始挑战</button>" +
+      "</div>" +
+      (pool.length ? "" : '<div class="muted" style="margin-top:8px">先去完成今日复习，复习过的词才会进入排位赛题池</div>') +
+      "</div>";
+
+    // 段位一览
+    html += '<div class="sec-title">段位一览</div><div class="tiers">';
+    RANK.TIERS.forEach(function (tp, i) {
+      html += '<div class="tier-chip' + (i === rs.tier ? " me" : "") + '" style="--tc:' + tp.color + '">' +
+        '<span class="tier-ico">' + tp.icon + "</span>" + esc(tp.name) + "</div>";
+    });
+    html += "</div>";
+
+    // 昵称
+    html += '<div class="card" style="padding:14px 18px;margin-top:16px">' +
+      '<div class="row between"><span class="muted">排行榜昵称</span></div>' +
+      '<div class="row" style="margin-top:8px">' +
+      '<input id="rankNick" class="cmt-input" maxlength="20" placeholder="留空显示「匿名同学」" value="' + esc(rs.nick) + '">' +
+      '<button class="btn ghost sm" data-act="rank-nick-save">保存</button></div></div>';
+
+    // 排行榜
+    html += '<div class="row between" style="margin:16px 2px 10px"><b>🏆 全站排行榜</b>' +
+      '<button class="btn ghost sm" data-act="rank-refresh">刷新</button></div>' +
+      '<div id="rankBoard"><div class="cmt-empty">正在加载排行榜…</div></div>';
+
+    $("#view-rank").innerHTML = html;
+    loadBoard();
+  }
+
+  function dots3(stars) {
+    var s = "";
+    for (var i = 0; i < RANK.STARS_PER_TIER; i++) s += '<span class="star' + (i < stars ? " on" : "") + '">★</span>';
+    return s;
+  }
+
+  function loadBoard() {
+    var el = $("#rankBoard");
+    if (!el) return;
+    if (!RANK.hasCloud()) {
+      el.innerHTML = '<div class="cmt-empty">排行榜服务暂时不可用，稍后再试试～</div>';
+      return;
+    }
+    RANK.fetchBoard(50).then(function (res) {
+      if (!$("#rankBoard")) return;
+      if (res.error || !res.data) {
+        el.innerHTML = '<div class="cmt-empty">排行榜加载失败：' + esc((res.error && res.error.message) || "未知错误") + "</div>";
+        return;
+      }
+      var rows = res.data || [];
+      if (!rows.length) {
+        el.innerHTML = '<div class="cmt-empty">还没有人上榜，打一局排位赛抢占第一 ✨</div>';
+        return;
+      }
+      var me = RANK.state().pid;
+      var medals = ["🥇", "🥈", "🥉"];
+      el.innerHTML = rows.map(function (r, i) {
+        var tp = RANK.tierInfo(r.tier);
+        return '<div class="cmt rank-row' + (r.player_id === me ? " me" : "") + '">' +
+          '<div class="cmt-head">' +
+          '<span class="rank-no">' + (medals[i] || i + 1) + "</span>" +
+          '<div class="cmt-ava" style="background:' + tp.color + '">' + tp.icon + "</div>" +
+          '<span class="cmt-name">' + esc(r.nickname || "匿名同学") + "</span>" +
+          '<span class="tier-badge sm" style="--tc:' + tp.color + '"><span class="tier-ico">' + tp.icon + "</span>" + esc(tp.name) +
+          '<span class="tier-stars">' + dots3(r.stars) + "</span></span>" +
+          '<span class="rank-meta">学 ' + nz(r.learned) + " 词</span>" +
+          "</div></div>";
+      }).join("");
+    });
+  }
+
+  function startRank() {
+    var pool = ST.day(TODAY).reviewIds.map(ST.wordById).filter(Boolean);
+    if (!pool.length) return toast("先完成今日复习，再来排位赛");
+    session = {
+      mode: "rank",
+      pool: pool,
+      q: RANK.buildQuestion(pool, ST.allWords()),
+      streak: 0,
+      answered: 0,
+      right: 0,
+      state: "asking",
+      picked: -1,
+      started: Date.now()
+    };
+    openOverlay("🏆 排位赛 · " + RANK.tierInfo(RANK.state().tier).name);
+    renderSession();
+  }
+
+  function renderRankQuiz() {
+    var q = session.q;
+    var rs = RANK.state();
+    var t = RANK.tierInfo(rs.tier);
+    var html = '<div class="rank-status">' +
+      '<span class="tier-badge" style="--tc:' + t.color + '"><span class="tier-ico">' + t.icon + "</span>" + esc(t.name) +
+      '<span class="tier-stars">' + dots3(rs.stars) + "</span></span>" +
+      '<span class="rank-streak">连击 <b>' + session.streak + "</b> / " + RANK.GOAL + "</span>" +
+      "</div>";
+    html += '<div class="bar ov-bar2"><i style="width:' + pct(session.streak, RANK.GOAL) + '%"></i></div>';
+
+    if (session.state === "asking" || session.state === "feedback") {
+      html += '<div class="scard rank-card"><div class="word-line"><span class="word">' + esc(q.word.word) + "</span>" +
+        '<button class="speak-btn" data-act="speak-current" title="朗读">🔊</button></div>' +
+        (q.word.phonetic ? '<div class="phonetic">' + esc(q.word.phonetic) + "</div>" : "") +
+        '<div class="reveal-hint">选出正确的中文释义</div></div>';
+      html += '<div class="rank-opts">';
+      q.options.forEach(function (o, i) {
+        var cls = "rank-opt";
+        if (session.state === "feedback") {
+          if (o.ok) cls += " ok";
+          else if (i === session.picked) cls += " bad";
+        }
+        html += '<button class="' + cls + '" data-act="rank-pick" data-i="' + i + '"' +
+          (session.state === "feedback" ? " disabled" : "") + ">" + esc(o.text) + "</button>";
+      });
+      html += "</div>";
+      if (session.state === "feedback") {
+        html += '<div class="kbd-hint">' +
+          (session.lastOk
+            ? "✅ 答对了 · 连击 " + session.streak + " / " + RANK.GOAL
+            : "❌ 正确答案已标绿 · 连击清零，稳住再来") + "</div>";
+        html += '<div class="ov-foot"><button class="btn primary sm" data-act="rank-next">下一题（空格）</button></div>';
+      } else {
+        html += '<div class="kbd-hint">已答 ' + session.answered + " 题 · 答对 " + session.right + " 题</div>";
+      }
+    }
+    html += '<div class="ov-foot"><button class="btn ghost" data-act="exit-session">结束排位（保留段位）</button></div>';
+    $("#ovBody").innerHTML = html;
+  }
+
+  function rankPick(i) {
+    if (!session || session.mode !== "rank" || session.state !== "asking") return;
+    var q = session.q;
+    var ok = !!(q.options[i] && q.options[i].ok);
+    session.picked = i;
+    session.answered += 1;
+    session.lastOk = ok;
+    if (ok) {
+      session.right += 1;
+      session.streak += 1;
+      if (session.streak > nz(RANK.state().best)) {
+        RANK.state().best = session.streak;
+        RANK.save();
+      }
+      if (session.streak >= RANK.GOAL) {
+        var kind = RANK.promote();
+        session.streak = 0;
+        RANK.save();
+        reportRank();
+        if (kind === "tier") {
+          toast("🎉 晋级 " + RANK.tierInfo(RANK.state().tier).name + " 段位！", "ok");
+        } else if (kind === "star") {
+          toast("⭐ 升 1 星！", "ok");
+        } else {
+          toast("🍼 已站上最高段位「奶娃」！", "ok");
+        }
+      }
+    } else {
+      session.streak = 0;
+    }
+    session.state = "feedback";
+    renderSession();
+  }
+
+  function rankNext() {
+    if (!session || session.mode !== "rank") return;
+    session.q = RANK.buildQuestion(session.pool, ST.allWords());
+    if (!session.q) return closeOverlay();
+    session.state = "asking";
+    session.picked = -1;
+    renderSession();
+  }
+
+  function reportRank() {
+    var stats = ST.stats(TODAY);
+    RANK.report({ learned: nz(stats.totalWords), mastered: nz(stats.mastered) });
+  }
+
   /* ==================== 总渲染 ==================== */
 
   function render() {
@@ -807,6 +1037,7 @@
     else if (view === "books") renderBooks();
     else if (view === "roots") renderRoots();
     else if (view === "stats") renderStats();
+    else if (view === "rank") renderRank();
     else renderSettings();
   }
 
@@ -890,6 +1121,7 @@
   function progressText() {
     if (!session) return "";
     if (session.mode === "quiz") return session.index + 1 + " / " + session.questions.length + " 题";
+    if (session.mode === "rank") return "答对 " + session.right + " / " + session.answered;
     var done = Object.keys(session.seen).length;
     return done + " / " + session.total + " 词";
   }
@@ -906,6 +1138,7 @@
     $("#ovBar").style.width = ratio + "%";
 
     if (session.mode === "quiz") renderQuiz();
+    else if (session.mode === "rank") renderRankQuiz();
     else renderCard();
   }
 
@@ -1342,6 +1575,24 @@
       case "start-review":
         startSession("review");
         break;
+      case "start-rank":
+        startRank();
+        break;
+      case "rank-pick":
+        rankPick(Number(t.getAttribute("data-i")));
+        break;
+      case "rank-next":
+        rankNext();
+        break;
+      case "rank-refresh":
+        loadBoard();
+        break;
+      case "rank-nick-save": {
+        var nn = RANK.setNick(($("#rankNick") || {}).value);
+        reportRank();
+        toast(nn ? "昵称已保存：" + nn : "已清除昵称，将显示「匿名同学」", "ok");
+        break;
+      }
       case "start-quiz":
         startSession("quiz");
         break;
@@ -1352,7 +1603,9 @@
         }
         break;
       case "speak-current":
-        if (session && session.mode !== "quiz") {
+        if (session && session.mode === "rank") {
+          if (session.q && session.q.word) speak(session.q.word.word);
+        } else if (session && session.mode !== "quiz") {
           var w0 = session.queue[0];
           if (w0) speak(w0.word);
         }
@@ -1367,6 +1620,7 @@
         startSession("review");
         break;
       case "exit-session":
+        if (session && session.mode === "rank") reportRank();
         closeOverlay();
         break;
 
@@ -1628,6 +1882,21 @@
         if (!cur) return; // 已在结果页
         if (session.state === "asking" && cur.type === "blank") submitQuiz();
         else if (session.state === "answered") nextQuestion();
+      }
+      return;
+    }
+
+    if (session.mode === "rank") {
+      if (typing) return;
+      if (session.state === "feedback" && (e.key === " " || e.key === "Enter")) {
+        e.preventDefault();
+        rankNext();
+        return;
+      }
+      if (session.state === "asking" && /^[1-4]$/.test(e.key)) {
+        e.preventDefault();
+        rankPick(Number(e.key) - 1);
+        return;
       }
       return;
     }
