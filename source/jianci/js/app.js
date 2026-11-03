@@ -1348,22 +1348,74 @@
     }
   }
 
-  function rate(rating) {
-    var w = session.queue.shift();
-    if (!w) return;
-    if (session.mode === "new") ST.learnWord(w.id, rating, TODAY);
-    else ST.reviewWord(w.id, rating, TODAY);
-    session.seen[w.id] = true;
-    if (rating === "forgot") {
-      session.wrong.push(w);
-      // 忘记的词插回本轮队列，稍后再看一次
-      var pos = Math.min(3, session.queue.length);
-      session.queue.splice(pos, 0, w);
+  /** 慢动作斩词特效：刀光斜劈 + 单词切成两半飘开 + 粒子迸溅，结束后回调 */
+  function playSlashFx(done) {
+    var card = document.querySelector("#ovBody .scard");
+    var line = card && card.querySelector(".word-line");
+    var wordEl = line && line.querySelector(".word");
+    if (!line || !wordEl) { done(); return; }
+    var text = wordEl.textContent;
+
+    // 粒子：随机方向迸溅
+    var sparks = "";
+    for (var i = 0; i < 12; i++) {
+      var ang = (Math.PI * 2 * i) / 12 + (Math.random() - 0.5) * 0.6;
+      var dist = 42 + Math.random() * 64;
+      sparks += '<i style="--dx:' + (Math.cos(ang) * dist).toFixed(0) + "px;--dy:" +
+        (Math.sin(ang) * dist).toFixed(0) + "px;animation-delay:" + (Math.random() * 0.14).toFixed(2) + 's"></i>';
     }
-    session.revealed = false;
-    session.spokeFor = null;
-    renderSession();
-    if (!session) render();
+
+    var fx = document.createElement("div");
+    fx.className = "slash-fx";
+    fx.innerHTML =
+      '<div class="slash-blade"></div>' +
+      '<div class="slash-clip top"><span class="word">' + esc(text) + "</span></div>" +
+      '<div class="slash-clip bot"><span class="word">' + esc(text) + "</span></div>" +
+      '<div class="slash-sparks">' + sparks + "</div>";
+
+    // 让特效层精确覆盖在单词上
+    var r = wordEl.getBoundingClientRect();
+    var lr = line.getBoundingClientRect();
+    fx.style.left = r.left - lr.left - 10 + "px";
+    fx.style.top = r.top - lr.top - 6 + "px";
+    fx.style.width = r.width + 20 + "px";
+    fx.style.height = r.height + 12 + "px";
+
+    line.classList.add("slashing");
+    line.appendChild(fx);
+    requestAnimationFrame(function () { fx.classList.add("go"); });
+    setTimeout(done, 950);
+  }
+
+  function rate(rating) {
+    if (session.slashing) return; // 斩词动画播放中，忽略连点
+    var w = session.queue[0];
+    if (!w) return;
+
+    var advance = function () {
+      session.queue.shift();
+      if (session.mode === "new") ST.learnWord(w.id, rating, TODAY);
+      else ST.reviewWord(w.id, rating, TODAY);
+      session.seen[w.id] = true;
+      if (rating === "forgot") {
+        session.wrong.push(w);
+        // 忘记的词插回本轮队列，稍后再看一次
+        var pos = Math.min(3, session.queue.length);
+        session.queue.splice(pos, 0, w);
+      }
+      session.revealed = false;
+      session.spokeFor = null;
+      session.slashing = false;
+      renderSession();
+      if (!session) render();
+    };
+
+    if (rating === "know") {
+      session.slashing = true;
+      playSlashFx(advance);
+      return;
+    }
+    advance();
   }
 
   function renderRoundSummary() {
@@ -1868,6 +1920,9 @@
           s.books.push(bid);
         }
         ST.save();
+        // 词书变了：待学队列同步换成新词书里的词（已学进度不受影响）
+        var removed = ST.reassignPending(TODAY);
+        if (removed > 0) toast("已切换，今天的待学词换成新词书的了 ✅", "ok");
         render();
         break;
       }

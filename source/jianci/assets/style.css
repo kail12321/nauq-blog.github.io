@@ -729,3 +729,81 @@ iframe.board-frame { margin-top: 2px; height: 460px; }
 }
 .data-loading.sm .spinner { width: 18px; height: 18px; border-width: 2.5px; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── 慢动作斩词特效 ── */
+.word-line { position: relative; }
+.word-line.slashing .word,
+.word-line.slashing .speak-btn { visibility: hidden; }
+.word-line.slashing { animation: slashShake 0.34s ease-out 0.22s; }
+@keyframes slashShake {
+  0%, 100% { transform: none; }
+  30% { transform: translate(2px, -1px); }
+  60% { transform: translate(-2px, 1px); }
+  80% { transform: translate(1px, 0); }
+}
+
+.slash-fx { position: absolute; z-index: 6; pointer-events: none; }
+.slash-fx .slash-clip {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+}
+.slash-fx .slash-clip .word { white-space: nowrap; }
+.slash-fx .slash-clip.top {
+  clip-path: polygon(0 0, 100% 0, 100% 32%, 0 68%);
+}
+.slash-fx .slash-clip.bot {
+  clip-path: polygon(0 68%, 100% 32%, 100% 100%, 0 100%);
+}
+.slash-fx.go .slash-clip { opacity: 1; }
+/* 两半沿切口缓慢分开、旋转、淡出 */
+.slash-fx.go .slash-clip.top { animation: cutTop 0.78s cubic-bezier(0.18, 0.7, 0.32, 1) 0.22s forwards; }
+.slash-fx.go .slash-clip.bot { animation: cutBot 0.78s cubic-bezier(0.18, 0.7, 0.32, 1) 0.22s forwards; }
+@keyframes cutTop {
+  0% { opacity: 1; transform: none; filter: brightness(1); }
+  55% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-15px, -30px) rotate(-7deg); filter: brightness(1.35); }
+}
+@keyframes cutBot {
+  0% { opacity: 1; transform: none; filter: brightness(1); }
+  55% { opacity: 1; }
+  100% { opacity: 0; transform: translate(17px, 32px) rotate(5deg); filter: brightness(1.35); }
+}
+
+/* 刀光：细长光刃从左侧扫入，带辉光 */
+.slash-blade {
+  position: absolute; left: -12%; top: 50%;
+  width: 124%; height: 2.5px;
+  background: linear-gradient(90deg, transparent 0%, #fff 16%, #c9ecff 50%, #fff 84%, transparent 100%);
+  box-shadow:
+    0 0 10px 2px rgba(150, 215, 255, 0.95),
+    0 0 28px 8px rgba(110, 175, 255, 0.45);
+  border-radius: 999px;
+  transform: translateY(-50%) rotate(-8deg) scaleX(0);
+  transform-origin: 32% 50%;
+  opacity: 0;
+}
+.slash-fx.go .slash-blade { animation: bladeSweep 0.52s cubic-bezier(0.16, 0.84, 0.3, 1) 0.06s forwards; }
+@keyframes bladeSweep {
+  0% { opacity: 0; transform: translateY(-50%) rotate(-8deg) scaleX(0); }
+  22% { opacity: 1; }
+  58% { opacity: 1; transform: translateY(-50%) rotate(-8deg) scaleX(1); }
+  100% { opacity: 0; transform: translateY(-50%) rotate(-8deg) scaleX(1); }
+}
+
+/* 迸溅粒子 */
+.slash-sparks { position: absolute; inset: 0; }
+.slash-sparks i {
+  position: absolute; left: 50%; top: 50%;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #a5daff 55%, transparent 100%);
+  box-shadow: 0 0 7px 1px rgba(150, 215, 255, 0.85);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+  animation: sparkFly 0.62s ease-out forwards;
+}
+@keyframes sparkFly {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  18% { opacity: 1; transform: translate(calc(-50% + var(--dx) * 0.25), calc(-50% + var(--dy) * 0.25)) scale(1.15); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.6); }
+}

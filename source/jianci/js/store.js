@@ -111,6 +111,22 @@
     _all = null;
   }
 
+  /** 词书选择变化后：清掉不属于当前词书的待学词，再按今日配额从新词书重新分配 */
+  function reassignPending(today) {
+    var t = SRS.todayKey(today);
+    var valid = {};
+    selectedBooks().forEach(function (b) { valid[b.id] = true; });
+    var before = S.pending.length;
+    S.pending = S.pending.filter(function (id) {
+      var bk = bookOfWord(id);
+      return bk ? !!valid[bk] : false;
+    });
+    var removed = before - S.pending.length;
+    assignNew(t);
+    save();
+    return removed;
+  }
+
   function clamp(n, lo, hi) {
     n = Number(n);
     if (!isFinite(n)) n = lo;
@@ -853,6 +869,7 @@
     library: library,
     bookById: bookById,
     refreshIndex: refreshIndex,
+    reassignPending: reassignPending,
     selectedBooks: selectedBooks,
     wordById: wordById,
     allWords: allWords,
